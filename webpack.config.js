@@ -11,11 +11,15 @@ module.exports = {
           'css-loader',
         ],
       },
+      {
+        test: /\.scss$/,
+        use: ['style-loader', 'css-loader', 'postcss-loader', 'sass-loader'],
+      },
     ],
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: 'template.html',
+      template: './src/index.html',
     }),
   ],
 };
