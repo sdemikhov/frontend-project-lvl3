@@ -1,13 +1,10 @@
-import path from 'path';
-import HtmlWebpackPlugin from 'html-webpack-plugin';
-import MiniCssExtractPlugin from 'mini-css-extract-plugin';
-import FaviconsWebpackPlugin from 'favicons-webpack-plugin';
-import { fileURLToPath } from 'url';
+const path = require('path');
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const FaviconsWebpackPlugin = require('favicons-webpack-plugin');
 
-export default {
+module.exports = {
   mode: process.env.NODE_ENV || 'development',
   entry: './src/index.js',
   output: {

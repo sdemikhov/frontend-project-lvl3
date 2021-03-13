@@ -1,12 +1,20 @@
-/* eslint-disable no-param-reassign */
 import i18n from 'i18next';
 import onChange from 'on-change';
 import * as yup from 'yup';
+import axios from 'axios';
 
 import view from './view.js';
-import resources from './locales';
+import resources from './locales/locales.js';
+import parseXML from './xml-parser.js';
 
 const DEFAULT_LANGUAGE = 'ru';
+
+const routes = {
+  allOrigins: (url) => {
+    const encoded = encodeURIComponent(url);
+    return `https://hexlet-allorigins.herokuapp.com/get?url=${encoded}`;
+  },
+};
 
 const validateURL = (url, downloadedURLS) => {
   const schema = yup.string().required().url().notOneOf(downloadedURLS);
@@ -14,6 +22,12 @@ const validateURL = (url, downloadedURLS) => {
     .validate(url, { abortEarly: false })
     .then(() => [])
     .catch((e) => e.inner);
+};
+
+const errorMessages = {
+  network: {
+    message: i18n.t('downloadFeed.failed'),
+  },
 };
 
 export default () => {
@@ -24,7 +38,7 @@ export default () => {
       inputValue: null,
       errors: [],
     },
-    feeds: {},
+    feeds: [],
   };
 
   i18n.init({ lng: DEFAULT_LANGUAGE, resources })
@@ -41,6 +55,36 @@ export default () => {
         const downloadedURLS = Object.keys(watchedState.feeds);
         validateURL(value, downloadedURLS).then((errors) => {
           watchedState.requestForm.errors = errors;
+
+          if (errors.length > 0) {
+            return;
+          }
+
+          watchedState.requestForm.state = 'sending';
+          axios.get(routes.allOrigins(value))
+            .then((response) => {
+              const feed = parseXML(response.data.contents);
+
+              watchedState.feeds.unshift(feed);
+              watchedState.requestForm.state = 'finished';
+            })
+            .catch((err) => {
+              console.log(err.message);
+              watchedState.requestForm.state = 'failed';
+              if (axios.isAxiosError(err)) {
+                watchedState.requestForm.errors.push(errorMessages.network);
+              } else {
+                watchedState.requestForm.errors.push(err);
+              }
+            });
+        });
+      });
+
+      const buttons = document.querySelectorAll('[data-language]');
+      buttons.forEach((button) => {
+        button.addEventListener('click', (e) => {
+          const { language } = e.target.dataset;
+          watchedState.language = language;
         });
       });
     });

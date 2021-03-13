@@ -9,5 +9,17 @@ export default {
       example: 'Example: https://ru.hexlet.io/lessons.rss',
       buttonAdd: 'Add',
     },
+    downloadFeed: {
+      success: 'RSS loaded successfully',
+      failed: 'Network Problems. Try again.',
+    },
+    parseXML: {
+      error: 'No RSS channel found.',
+    },
+    feeds: 'Feeds',
+    posts: {
+      header: 'Posts',
+      view: 'View',
+    },
   },
 };

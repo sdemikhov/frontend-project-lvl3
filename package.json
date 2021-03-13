@@ -3,8 +3,9 @@
   "version": "0.0.6",
   "description": "Aggregate your RSS feeds with RSS Reader.",
   "main": "src/index.js",
+  "type": "module",
   "scripts": {
-    "test": "jest --colors"
+    "test": "npx jest --colors"
   },
   "jest": {
     "verbose": true,
