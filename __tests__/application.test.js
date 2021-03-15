@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import fs from 'fs';
 
 import parseXML from '../src/xml-parser.js';
+import validateURL from '../src/validate-url.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -26,3 +27,19 @@ test('parseXML(validXML)', () => {
 test('parseXML()', () => {
   expect(() => parseXML()).toThrow();
 });
+
+test.each([
+  [
+    'http://unique.example.com',
+    ['http://a.example.com', 'http://b.example.com'],
+    [],
+  ],
+  [
+    'http://notunique.example.com',
+    ['http://a.example.com', 'http://notunique.example.com'],
+    [],
+  ],
+])('validateURL(%s, %s)', (url, downloadedURLS, result) => (
+  validateURL(url, downloadedURLS)
+    .then((actual) => expect(actual).toEqual(result))
+));

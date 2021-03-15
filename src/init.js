@@ -1,11 +1,11 @@
 import i18n from 'i18next';
 import onChange from 'on-change';
-import * as yup from 'yup';
 import axios from 'axios';
 
 import view from './view.js';
 import resources from './locales/locales.js';
 import parseXML from './xml-parser.js';
+import validateURL from './validate-url.js';
 
 const DEFAULT_LANGUAGE = 'ru';
 
@@ -14,14 +14,6 @@ const routes = {
     const encoded = encodeURIComponent(url);
     return `https://hexlet-allorigins.herokuapp.com/get?url=${encoded}`;
   },
-};
-
-const validateURL = (url, downloadedURLS) => {
-  const schema = yup.string().required().url().notOneOf(downloadedURLS);
-  return schema
-    .validate(url, { abortEarly: false })
-    .then(() => [])
-    .catch((e) => e.inner);
 };
 
 const errorMessages = {
