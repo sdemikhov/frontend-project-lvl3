@@ -38,8 +38,8 @@ const processFormState = (value) => {
   if (value === 'finished') {
     submitButton.disabled = false;
 
-    const input = document.getElementById('addressInput');
-    input.textContent = '';
+    const form = document.getElementById('request-form');
+    form.reset();
 
     const feedback = document.getElementById('validationAddressInput');
     feedback.classList.add('text-success');
