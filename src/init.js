@@ -27,7 +27,6 @@ export default () => {
     language: DEFAULT_LANGUAGE,
     requestForm: {
       state: 'filling',
-      inputValue: null,
       errors: [],
     },
     feeds: [],
@@ -41,11 +40,10 @@ export default () => {
       requestForm.addEventListener('submit', (e) => {
         e.preventDefault();
 
-        const { value } = e.target.elements.addressInput;
-        watchedState.requestForm.inputValue = value;
+        const { value: url } = e.target.elements.addressInput;
 
-        const downloadedURLS = Object.keys(watchedState.feeds);
-        validateURL(value, downloadedURLS).then((errors) => {
+        const downloadedURLS = watchedState.feeds.map((feed) => feed.link);
+        validateURL(url, downloadedURLS).then((errors) => {
           watchedState.requestForm.errors = errors;
 
           if (errors.length > 0) {
@@ -53,9 +51,10 @@ export default () => {
           }
 
           watchedState.requestForm.state = 'sending';
-          axios.get(routes.allOrigins(value))
+          axios.get(routes.allOrigins(url))
             .then((response) => {
               const feed = parseXML(response.data.contents);
+              feed.link = url;
 
               watchedState.feeds.unshift(feed);
               watchedState.requestForm.state = 'finished';

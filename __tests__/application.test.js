@@ -32,14 +32,19 @@ test.each([
   [
     'http://unique.example.com',
     ['http://a.example.com', 'http://b.example.com'],
+    true,
+  ],
+  [
+    '',
     [],
+    false,
   ],
   [
     'http://notunique.example.com',
     ['http://a.example.com', 'http://notunique.example.com'],
-    [],
+    false,
   ],
 ])('validateURL(%s, %s)', (url, downloadedURLS, result) => (
   validateURL(url, downloadedURLS)
-    .then((actual) => expect(actual).toEqual(result))
+    .then((errors) => expect(errors.length === 0).toBe(result))
 ));

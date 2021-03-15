@@ -4,11 +4,6 @@ export default {
       en: 'English',
       ru: 'Русский',
     },
-    requestForm: {
-      placeholder: 'RSS link',
-      example: 'Example: https://ru.hexlet.io/lessons.rss',
-      buttonAdd: 'Add',
-    },
     downloadFeed: {
       success: 'RSS loaded successfully',
       failed: 'Network Problems. Try again.',
@@ -20,6 +15,20 @@ export default {
     posts: {
       header: 'Posts',
       view: 'View',
+    },
+    validation: {
+      required: 'This field is required.',
+      url: 'Must contain a valid url.',
+      notOneOf: 'RSS channel already exist.',
+    },
+    page: {
+      mainHeader: ['RSS Aggregator'],
+      addressHelp: ['Example: https://ru.hexlet.io/lessons.rss'],
+      addressInput: ['placeholder', 'RSS link'],
+      buttonAdd: ['Add'],
+      feedsHeader: ['Feeds'],
+      postsHeader: ['Posts'],
+      viewPostButton: ['View'],
     },
   },
 };
