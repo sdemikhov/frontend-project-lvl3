@@ -10,8 +10,5 @@ export default (url, downloadedURLS) => {
   return schema
     .validate(url, { abortEarly: false })
     .then(() => [])
-    .catch((e) => {
-      console.log(e);
-      return e.inner;
-    });
+    .catch((e) => e.inner);
 };

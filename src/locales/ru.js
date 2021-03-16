@@ -29,7 +29,7 @@ export default {
       feedsHeader: ['Фиды'],
       postsHeader: ['Посты'],
       viewPostButton: ['Просмотр'],
-      createdBy: ['Сайт создал '],
+      createdBy: ['Создал '],
       author: ['Сергей Демихов'],
     },
   },

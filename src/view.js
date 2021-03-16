@@ -76,7 +76,7 @@ const changeLanguage = (code) => {
         const [attribute, value] = property;
         element.setAttribute(attribute, value);
       } else {
-        element.textContent = property; // no eslint
+        element.textContent = property;
       }
     });
   });
@@ -103,13 +103,12 @@ const createFeedsEl = (feeds) => {
   return postsUl;
 };
 
-const createPostsEl = (feeds) => {
+const createPostsEl = (posts) => {
   const postsUl = document.createElement('ul');
   postsUl.classList.add('list-group');
 
   let id = 0;
-  feeds
-    .reduce((acc, { items }) => [...acc, ...items], [])
+  posts
     .forEach((post) => {
       const postsLi = document.createElement('li');
       postsLi.classList.add(
@@ -148,12 +147,14 @@ const renderFeeds = (feeds) => {
 
   feedsContainer.innerHTML = '';
   feedsContainer.append(feedsHeader, feedsEl);
+};
 
+const renderPosts = (posts) => {
   const postsContainer = document.querySelector('#posts');
   const postsHeader = document.createElement('h2');
   postsHeader.dataset.translate = 'postsHeader';
   postsHeader.textContent = i18n.t('posts.header');
-  const postsEl = createPostsEl(feeds);
+  const postsEl = createPostsEl(posts);
 
   postsContainer.innerHTML = '';
   postsContainer.append(postsHeader, postsEl);
@@ -174,5 +175,9 @@ export default (path, value) => {
 
   if (path === 'feeds') {
     renderFeeds(value);
+  }
+
+  if (path === 'posts') {
+    renderPosts(value);
   }
 };

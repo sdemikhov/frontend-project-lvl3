@@ -1,7 +1,9 @@
-{
-  "title": "Lorem ipsum feed for an interval of 1 years with 10 item(s)",
-  "description": "This is a constantly updating lorem ipsum feed",
-  "items": [
+[
+  {
+    "title": "Lorem ipsum feed for an interval of 1 years with 10 item(s)",
+    "description": "This is a constantly updating lorem ipsum feed"
+  },
+  [
     {
       "title": "Lorem ipsum 2021-01-01T00:00:00Z",
       "description": "Cupidatat aliqua minim incididunt adipisicing officia proident quis pariatur fugiat consequat.",
@@ -53,4 +55,4 @@
       "link": "http://example.com/test/1325376000"
     }    
   ]
-}
+]

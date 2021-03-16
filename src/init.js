@@ -1,6 +1,7 @@
 import i18n from 'i18next';
 import onChange from 'on-change';
 import axios from 'axios';
+import _ from 'lodash';
 
 import view from './view.js';
 import resources from './locales/locales.js';
@@ -30,6 +31,8 @@ export default () => {
       errors: [],
     },
     feeds: [],
+    posts: [],
+    timeoutID: null,
   };
 
   i18n.init({ lng: DEFAULT_LANGUAGE, resources })
@@ -51,22 +54,57 @@ export default () => {
           }
 
           watchedState.requestForm.state = 'sending';
+
+          if (watchedState.timeoutID) {
+            clearTimeout(watchedState.timeoutID);
+            watchedState.timeoutID = null;
+          }
+
           axios.get(routes.allOrigins(url))
             .then((response) => {
-              const feed = parseXML(response.data.contents);
+              const [feed, posts] = parseXML(response.data.contents);
               feed.link = url;
 
               watchedState.feeds.unshift(feed);
+              watchedState.posts.push(...posts);
               watchedState.requestForm.state = 'finished';
             })
             .catch((err) => {
-              console.log(err.message);
               watchedState.requestForm.state = 'failed';
               if (axios.isAxiosError(err)) {
                 watchedState.requestForm.errors.push(errorMessages.network);
               } else {
                 watchedState.requestForm.errors.push(err);
               }
+            })
+            .then(() => {
+              function updatePosts(urls) {
+                const promises = urls.map((feedURL) => axios
+                  .get(routes.allOrigins(feedURL))
+                  .then((resp) => {
+                    const [, nposts] = parseXML(resp.data.contents);
+                    console.log(nposts);
+                    return nposts;
+                  })
+                  .catch());
+                Promise.all(promises).then((allPosts) => {
+                  const oldPosts = watchedState.posts;
+                  const newPosts = _.flatten(allPosts);
+                  const uniquePosts = _.uniqWith([...oldPosts, ...newPosts], _.isEqual);
+                  watchedState.posts = uniquePosts;
+
+                  watchedState.timeoutID = setTimeout(
+                    updatePosts,
+                    5000,
+                    watchedState.feeds.map((feed) => feed.link),
+                  );
+                });
+              }
+              watchedState.timeoutID = setTimeout(
+                updatePosts,
+                5000,
+                watchedState.feeds.map((feed) => feed.link),
+              );
             });
         });
       });

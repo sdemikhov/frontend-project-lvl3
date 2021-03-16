@@ -15,7 +15,7 @@ const getClearContent = (element) => {
 };
 
 export default (stringWithXML) => {
-  const result = {};
+  const feed = {};
   const parser = new window.DOMParser();
   const doc = parser.parseFromString(stringWithXML, 'application/xml');
   const channel = doc.querySelector('channel');
@@ -25,12 +25,12 @@ export default (stringWithXML) => {
   }
 
   const title = channel.querySelector('title');
-  result.title = getClearContent(title);
+  feed.title = getClearContent(title);
 
   const description = channel.querySelector('description');
-  result.description = getClearContent(description);
+  feed.description = getClearContent(description);
 
-  result.items = [];
+  const items = [];
 
   const itemsEl = channel.querySelectorAll('item');
   itemsEl.forEach((item) => {
@@ -45,8 +45,8 @@ export default (stringWithXML) => {
     const itemLinkEl = item.querySelector('link');
     parsed.link = getClearContent(itemLinkEl);
 
-    result.items.push(parsed);
+    items.push(parsed);
   });
 
-  return result;
+  return [feed, items];
 };
