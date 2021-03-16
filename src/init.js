@@ -13,7 +13,7 @@ const DEFAULT_LANGUAGE = 'ru';
 const routes = {
   allOrigins: (url) => {
     const encoded = encodeURIComponent(url);
-    return `https://hexlet-allorigins.herokuapp.com/get?url=${encoded}`;
+    return `https://hexlet-allorigins.herokuapp.com/get?disableCache=true&url=${encoded}`;
   },
 };
 
@@ -66,7 +66,7 @@ export default () => {
               feed.link = url;
 
               watchedState.feeds.unshift(feed);
-              watchedState.posts.push(...posts);
+              watchedState.posts.unshift(...posts);
               watchedState.requestForm.state = 'finished';
             })
             .catch((err) => {
@@ -83,15 +83,19 @@ export default () => {
                   .get(routes.allOrigins(feedURL))
                   .then((resp) => {
                     const [, nposts] = parseXML(resp.data.contents);
-                    console.log(nposts);
                     return nposts;
                   })
-                  .catch());
+                  .catch(() => []));
                 Promise.all(promises).then((allPosts) => {
-                  const oldPosts = watchedState.posts;
-                  const newPosts = _.flatten(allPosts);
-                  const uniquePosts = _.uniqWith([...oldPosts, ...newPosts], _.isEqual);
-                  watchedState.posts = uniquePosts;
+                  const newPosts = [...watchedState.posts];
+                  const flattened = _.flatten(allPosts);
+                  flattened.forEach((post) => {
+                    const [samePost] = newPosts.filter((oldPost) => _.isEqual(oldPost, post));
+                    if (!samePost) {
+                      newPosts.unshift(post);
+                    }
+                  });
+                  watchedState.posts = newPosts;
 
                   watchedState.timeoutID = setTimeout(
                     updatePosts,
