@@ -29,6 +29,8 @@ export default {
       feedsHeader: ['Фиды'],
       postsHeader: ['Посты'],
       viewPostButton: ['Просмотр'],
+      createdBy: ['Сайт создал '],
+      author: ['Сергей Демихов'],
     },
   },
 };
