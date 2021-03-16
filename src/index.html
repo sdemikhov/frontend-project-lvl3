@@ -5,19 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>RSS Reader</title>
 </head>
-<body>
-    <header>
-        <nav class="container-fluid bg-primary p-2">
+<body class="d-flex flex-column min-vh-100">
+    <main class="flex-grow-1">
+        <section class="container-fluid bg-primary p-3">
             <div class="row">
                 <div class="mx-auto text-light col-md-10 col-lg-8">
                     <button class="btn btn-sm btn-outline-success me-2" data-language="ru">Русский</button>
                     <button class="btn btn-sm btn-outline-light" data-language="en">English</button>
                 </div>
             </div>
-        </nav>
-    </header>
-    <main>
-        <section class="container-fluid bg-primary p-3">
             <div class="row">
                 <div class="mx-auto text-light col-md-10 col-lg-8">
                     <h1 class="display-3" data-translate="mainHeader">RSS агрегатор</h1>
@@ -45,5 +41,10 @@
             </div>
         </section>
     </main>
+    <footer class="footer border-top py-3 mt-5 bg-secondary">
+        <div class="container-xl">
+            <div class="text-center">created by <a href="https://github.com/sdemikhov" target="_blank">Sergey Demikhov</a></div>
+        </div>
+    </footer>
 </body>
 </html>
