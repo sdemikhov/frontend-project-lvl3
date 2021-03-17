@@ -31,6 +31,8 @@ export default {
       viewPostButton: ['Просмотр'],
       createdBy: ['Создал '],
       author: ['Сергей Демихов'],
+      closeModal: ['Закрыть'],
+      readMore: ['Читать полностью'],
     },
   },
 };

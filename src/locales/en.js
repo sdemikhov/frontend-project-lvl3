@@ -31,6 +31,8 @@ export default {
       viewPostButton: ['View'],
       createdBy: ['Created by '],
       author: ['Sergey Demikhov'],
+      closeModal: ['Close'],
+      readMore: ['Read more'],
     },
   },
 };

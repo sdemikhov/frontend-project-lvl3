@@ -97,7 +97,7 @@ const createFeedsEl = (feeds) => {
     feedPEl.textContent = feed.description;
 
     feedLi.append(feedHeader, feedPEl);
-    postsUl.append(feedLi);
+    postsUl.prepend(feedLi);
   });
 
   return postsUl;
@@ -107,7 +107,6 @@ const createPostsEl = (posts) => {
   const postsUl = document.createElement('ul');
   postsUl.classList.add('list-group');
 
-  let id = 0;
   posts
     .forEach((post) => {
       const postsLi = document.createElement('li');
@@ -119,20 +118,26 @@ const createPostsEl = (posts) => {
       );
 
       const postA = document.createElement('a');
-      postA.classList.add('font-weight-normal');
+      if (post.visited) {
+        postA.classList.add('font-weight-normal');
+      } else {
+        postA.classList.add('font-weight-bold');
+      }
+
       postA.textContent = post.title;
       postA.setAttribute('href', post.link);
-      postA.dataset.id = id;
+      postA.dataset.id = post.id;
 
       const postButton = document.createElement('button');
       postButton.dataset.translate = 'viewPostButton';
       postButton.classList.add('btn', 'btn-primary', 'btn-sm');
       postButton.textContent = i18n.t('posts.view');
-      postButton.dataset.id = id;
+      postButton.dataset.id = post.id;
+      postButton.setAttribute('data-toggle', 'modal');
+      postButton.setAttribute('data-target', '#modal');
 
       postsLi.append(postA, postButton);
-      postsUl.append(postsLi);
-      id += 1;
+      postsUl.prepend(postsLi);
     });
 
   return postsUl;
@@ -160,6 +165,25 @@ const renderPosts = (posts) => {
   postsContainer.append(postsHeader, postsEl);
 };
 
+const renderModal = (modal) => {
+  const modalEl = document.querySelector('#modal');
+  const modalTitle = modalEl.querySelector('.modal-title');
+  const modalBody = modalEl.querySelector('.modal-body');
+  const modalA = modalEl.querySelector('a');
+
+  modalTitle.textContent = modal.title;
+  modalBody.textContent = modal.body;
+  modalA.setAttribute('href', modal.href);
+};
+
+const renderVisitedPosts = (visitedPostsIds) => {
+  visitedPostsIds.forEach((id) => {
+    const a = document.querySelector(`a[data-id="${id}"]`);
+    a.classList.remove('font-weight-bold');
+    a.classList.add('font-weight-normal');
+  });
+};
+
 export default (path, value) => {
   if (path === 'requestForm.errors') {
     renderErrors(value);
@@ -179,5 +203,13 @@ export default (path, value) => {
 
   if (path === 'posts') {
     renderPosts(value);
+  }
+
+  if (path === 'modal') {
+    renderModal(value);
+  }
+
+  if (path === 'visitedPostsIds') {
+    renderVisitedPosts(value);
   }
 };

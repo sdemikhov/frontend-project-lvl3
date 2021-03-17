@@ -45,7 +45,7 @@ export default (stringWithXML) => {
     const itemLinkEl = item.querySelector('link');
     parsed.link = getClearContent(itemLinkEl);
 
-    items.push(parsed);
+    items.unshift(parsed);
   });
 
   return [feed, items];

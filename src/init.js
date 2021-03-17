@@ -33,11 +33,36 @@ export default () => {
     feeds: [],
     posts: [],
     timeoutID: null,
+    modal: {},
+    visitedPostsIds: [],
   };
 
   i18n.init({ lng: DEFAULT_LANGUAGE, resources })
     .then(() => {
       const watchedState = onChange(state, view);
+
+      const buttons = document.querySelectorAll('[data-language]');
+      buttons.forEach((button) => {
+        button.addEventListener('click', (e) => {
+          const { language } = e.target.dataset;
+          watchedState.language = language;
+        });
+      });
+
+      const modal = document.querySelector('#modal');
+      modal.addEventListener('show.bs.modal', (e) => {
+        const button = e.relatedTarget;
+        const selectedPostId = parseInt(button.dataset.id, 10);
+        const selectedPost = watchedState.posts.find(({ id: postId }) => selectedPostId === postId);
+        selectedPost.visited = true;
+
+        watchedState.visitedPostsIds.push(selectedPostId);
+        watchedState.modal = {
+          title: selectedPost.title,
+          body: selectedPost.description,
+          href: selectedPost.link,
+        };
+      });
 
       const requestForm = document.querySelector('#request-form');
       requestForm.addEventListener('submit', (e) => {
@@ -65,8 +90,15 @@ export default () => {
               const [feed, posts] = parseXML(response.data.contents);
               feed.link = url;
 
-              watchedState.feeds.unshift(feed);
-              watchedState.posts.unshift(...posts);
+              watchedState.feeds.push(feed);
+
+              let newPostId = watchedState.posts.length;
+              watchedState.posts.push(...posts.map((post) => {
+                const newPost = { ...post };
+                newPost.id = newPostId;
+                newPostId += 1;
+                return newPost;
+              }));
               watchedState.requestForm.state = 'finished';
             })
             .catch((err) => {
@@ -88,11 +120,16 @@ export default () => {
                   .catch(() => []));
                 Promise.all(promises).then((allPosts) => {
                   const newPosts = [...watchedState.posts];
+                  let newPostId = newPosts.length;
+
                   const flattened = _.flatten(allPosts);
                   flattened.forEach((post) => {
-                    const [samePost] = newPosts.filter((oldPost) => _.isEqual(oldPost, post));
+                    const samePost = newPosts.find((oldPost) => oldPost.title === post.title);
                     if (!samePost) {
-                      newPosts.unshift(post);
+                      const newPost = { ...post };
+                      newPost.id = newPostId;
+                      newPosts.push(newPost);
+                      newPostId += 1;
                     }
                   });
                   watchedState.posts = newPosts;
@@ -110,14 +147,6 @@ export default () => {
                 watchedState.feeds.map((feed) => feed.link),
               );
             });
-        });
-      });
-
-      const buttons = document.querySelectorAll('[data-language]');
-      buttons.forEach((button) => {
-        button.addEventListener('click', (e) => {
-          const { language } = e.target.dataset;
-          watchedState.language = language;
         });
       });
     });
