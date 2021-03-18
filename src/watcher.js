@@ -4,7 +4,7 @@ import renders from './renders.js';
 
 // to do: rewrite ifs to cases
 export default (state, elements) => {
-  function watchers(path, value) {
+  const watchedState = onChange(state, (path, value) => {
     if (path === 'requestForm.errors') {
       renders.renderErrors(value, elements);
       return;
@@ -26,15 +26,14 @@ export default (state, elements) => {
     }
 
     if (path === 'posts') {
-      renders.renderPosts(value, elements, this);
+      renders.renderPosts(value, elements, watchedState);
       return;
     }
 
     if (path === 'postIdForModal') {
-      renders.renderModal(value, elements, this);
+      renders.renderModal(value, elements, watchedState);
     }
-  }
-  const watchedState = onChange(state, watchers);
+  });
 
   return watchedState;
 };
