@@ -26,17 +26,23 @@ const renderErrors = (errors) => {
 
 const processFormState = (value) => {
   const submitButton = document.querySelector('[type="submit"]');
+  const input = document.querySelector('#addressInput');
+
   if (value === 'filling') {
     submitButton.disabled = false;
+    input.readOnly = false;
   }
   if (value === 'sending') {
     submitButton.disabled = true;
+    input.readOnly = true;
   }
   if (value === 'failed') {
     submitButton.disabled = false;
+    input.readOnly = false;
   }
   if (value === 'finished') {
     submitButton.disabled = false;
+    input.readOnly = false;
 
     const form = document.getElementById('request-form');
     form.reset();
