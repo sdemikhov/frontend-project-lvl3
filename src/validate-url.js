@@ -1,6 +1,7 @@
 import * as yup from 'yup';
 import i18n from 'i18next';
 
+// to do: fix error translation
 export default (url, downloadedURLS) => {
   const schema = yup
     .string()

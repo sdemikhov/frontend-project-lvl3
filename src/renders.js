@@ -3,61 +3,52 @@ import i18n from 'i18next';
 
 import resources from './locales/locales.js';
 
-const renderErrors = (errors) => {
-  const input = document.getElementById('addressInput');
-  const feedback = document.getElementById('validationAddressInput');
-
+const renderErrors = (errors, elements) => {
   if (errors.length > 0) {
     const messages = errors.map(({ message }) => message);
 
-    feedback.classList.add('text-danger');
-    feedback.textContent = messages.join(', ');
+    elements.feedback.classList.add('text-danger');
+    elements.feedback.textContent = messages.join(', ');
 
-    input.setAttribute('aria-describedby', feedback.id);
-    input.classList.add('is-invalid');
+    elements.input.setAttribute('aria-describedby', elements.feedback.id);
+    elements.input.classList.add('is-invalid');
   } else {
-    feedback.classList.remove('text-danger');
-    feedback.textContent = '';
+    elements.feedback.classList.remove('text-danger');
+    elements.feedback.textContent = '';
 
-    input.classList.remove('is-invalid');
-    input.setAttribute('aria-describedby', 'addressHelp');
+    elements.input.classList.remove('is-invalid');
+    elements.input.setAttribute('aria-describedby', 'addressHelp');
   }
 };
 
-const processFormState = (value) => {
-  const submitButton = document.querySelector('[type="submit"]');
-  const input = document.querySelector('#addressInput');
-
+const processFormState = (value, elements) => {
   if (value === 'filling') {
-    submitButton.disabled = false;
-    input.readOnly = false;
+    elements.submit.disabled = false;
+    elements.input.readOnly = false;
   }
   if (value === 'sending') {
-    submitButton.disabled = true;
-    input.readOnly = true;
+    elements.submit.disabled = true;
+    elements.input.readOnly = true;
   }
   if (value === 'failed') {
-    submitButton.disabled = false;
-    input.readOnly = false;
+    elements.submit.disabled = false;
+    elements.input.readOnly = false;
   }
   if (value === 'finished') {
-    submitButton.disabled = false;
-    input.readOnly = false;
+    elements.submit.disabled = false;
+    elements.input.readOnly = false;
 
-    const form = document.getElementById('request-form');
-    form.reset();
+    elements.form.reset();
 
-    const feedback = document.getElementById('validationAddressInput');
-    feedback.classList.add('text-success');
-    feedback.textContent = i18n.t('downloadFeed.success');
+    elements.feedback.classList.add('text-success');
+    elements.feedback.textContent = i18n.t('downloadFeed.success');
   }
 };
 
-const changeLanguage = (code) => {
+const changeLanguage = (code, elements) => {
   i18n.changeLanguage(code);
 
-  const buttons = document.querySelectorAll('[data-language]');
-  buttons.forEach((button) => {
+  elements.changeLanguageButtons.forEach((button) => {
     const { language } = button.dataset;
     if (language === code) {
       button.classList.remove('btn-outline-light');
@@ -71,13 +62,13 @@ const changeLanguage = (code) => {
   const { page } = resources[code].translation;
 
   Object.keys(page).forEach((name) => {
-    const elements = document.querySelectorAll(`[data-translate="${name}"]`);
+    const elems = document.querySelectorAll(`[data-translate="${name}"]`);
     if (!elements) {
       return;
     }
 
     const property = page[name];
-    elements.forEach((element) => {
+    elems.forEach((element) => {
       if (property.length > 1) {
         const [attribute, value] = property;
         element.setAttribute(attribute, value);
@@ -109,7 +100,7 @@ const createFeedsEl = (feeds) => {
   return postsUl;
 };
 
-const createPostsEl = (posts) => {
+const createPostsEl = (posts, state) => {
   const postsUl = document.createElement('ul');
   postsUl.classList.add('list-group');
 
@@ -124,7 +115,7 @@ const createPostsEl = (posts) => {
       );
 
       const postA = document.createElement('a');
-      if (post.visited) {
+      if (state.visitedPostsIds.has(post.id)) {
         postA.classList.add('font-weight-normal');
       } else {
         postA.classList.add('font-weight-bold');
@@ -141,6 +132,12 @@ const createPostsEl = (posts) => {
       postButton.dataset.id = post.id;
       postButton.setAttribute('data-toggle', 'modal');
       postButton.setAttribute('data-target', '#modal');
+      postButton.addEventListener('click', (e) => {
+        const button = e.target;
+        const selectedPostId = parseInt(button.dataset.id, 10);
+        state.postIdForModal = selectedPostId;
+        state.visitedPostsIds.add(selectedPostId);
+      });
 
       postsLi.append(postA, postButton);
       postsUl.prepend(postsLi);
@@ -149,73 +146,43 @@ const createPostsEl = (posts) => {
   return postsUl;
 };
 
-const renderFeeds = (feeds) => {
-  const feedsContainer = document.querySelector('#feeds');
+const renderFeeds = (feeds, elements) => {
   const feedsHeader = document.createElement('h2');
   feedsHeader.dataset.translate = 'feedsHeader';
   feedsHeader.textContent = i18n.t('feeds');
   const feedsEl = createFeedsEl(feeds);
 
-  feedsContainer.innerHTML = '';
-  feedsContainer.append(feedsHeader, feedsEl);
+  elements.feedsContainer.innerHTML = '';
+  elements.feedsContainer.append(feedsHeader, feedsEl);
 };
 
-const renderPosts = (posts) => {
-  const postsContainer = document.querySelector('#posts');
+const renderPosts = (posts, elements, state) => {
   const postsHeader = document.createElement('h2');
   postsHeader.dataset.translate = 'postsHeader';
   postsHeader.textContent = i18n.t('posts.header');
-  const postsEl = createPostsEl(posts);
+  const postsEl = createPostsEl(posts, state);
 
-  postsContainer.innerHTML = '';
-  postsContainer.append(postsHeader, postsEl);
+  elements.postsContainer.innerHTML = '';
+  elements.postsContainer.append(postsHeader, postsEl);
 };
 
-const renderModal = (modal) => {
-  const modalEl = document.querySelector('#modal');
-  const modalTitle = modalEl.querySelector('.modal-title');
-  const modalBody = modalEl.querySelector('.modal-body');
-  const modalA = modalEl.querySelector('a');
+const renderModal = (selectedPostId, elements, state) => {
+  const selectedPost = state.posts.find(({ id: postId }) => selectedPostId === postId);
 
-  modalTitle.textContent = modal.title;
-  modalBody.textContent = modal.body;
-  modalA.setAttribute('href', modal.href);
+  elements.modalTitle.textContent = selectedPost.title;
+  elements.modalBody.textContent = selectedPost.description;
+  elements.modalA.setAttribute('href', selectedPost.link);
+
+  const a = elements.postsContainer.querySelector(`a[data-id="${selectedPostId}"]`);
+  a.classList.remove('font-weight-bold');
+  a.classList.add('font-weight-normal');
 };
 
-const renderVisitedPosts = (visitedPostsIds) => {
-  visitedPostsIds.forEach((id) => {
-    const a = document.querySelector(`a[data-id="${id}"]`);
-    a.classList.remove('font-weight-bold');
-    a.classList.add('font-weight-normal');
-  });
-};
-
-export default (path, value) => {
-  if (path === 'requestForm.errors') {
-    renderErrors(value);
-  }
-
-  if (path === 'requestForm.state') {
-    processFormState(value);
-  }
-
-  if (path === 'language') {
-    changeLanguage(value);
-  }
-
-  if (path === 'feeds') {
-    renderFeeds(value);
-  }
-
-  if (path === 'posts') {
-    renderPosts(value);
-  }
-
-  if (path === 'modal') {
-    renderModal(value);
-  }
-
-  if (path === 'visitedPostsIds') {
-    renderVisitedPosts(value);
-  }
+export default {
+  renderErrors,
+  processFormState,
+  changeLanguage,
+  renderFeeds,
+  renderPosts,
+  renderModal,
 };

@@ -1,10 +1,8 @@
 import i18n from 'i18next';
-import onChange from 'on-change';
 import axios from 'axios';
 import _ from 'lodash';
-import $ from 'jquery';
 
-import view from './view.js';
+import buildwatchedState from './watcher.js';
 import resources from './locales/locales.js';
 import parseXML from './xml-parser.js';
 import validateURL from './validate-url.js';
@@ -28,38 +26,47 @@ export default () => {
     feeds: [],
     posts: [],
     timeoutID: null,
-    modal: {},
-    visitedPostsIds: [],
+    postIdForModal: null,
+    visitedPostsIds: new Set(),
   };
 
   i18n.init({ lng: DEFAULT_LANGUAGE, resources })
     .then(() => {
-      const watchedState = onChange(state, view);
+      const form = document.querySelector('#request-form');
+      const input = form.querySelector('#addressInput');
+      const feedback = form.querySelector('#validationAddressInput');
+      const submit = form.querySelector('[type="submit"]');
+      const changeLanguageButtons = document.querySelectorAll('[data-language]');
+      const feedsContainer = document.querySelector('#feeds');
+      const postsContainer = document.querySelector('#posts');
+      const modal = document.querySelector('#modal');
+      const modalTitle = modal.querySelector('.modal-title');
+      const modalBody = modal.querySelector('.modal-body');
+      const modalA = modal.querySelector('a');
 
-      const buttons = document.querySelectorAll('[data-language]');
-      buttons.forEach((button) => {
+      const elements = {
+        form,
+        input,
+        feedback,
+        submit,
+        changeLanguageButtons,
+        feedsContainer,
+        postsContainer,
+        modal,
+        modalTitle,
+        modalBody,
+        modalA,
+      };
+      const watchedState = buildwatchedState(state, elements);
+
+      changeLanguageButtons.forEach((button) => {
         button.addEventListener('click', (e) => {
           const { language } = e.target.dataset;
           watchedState.language = language;
         });
       });
 
-      $('#modal').on('show.bs.modal', (event) => {
-        const button = $(event.relatedTarget);
-        const selectedPostId = parseInt(button.data('id'), 10);
-        const selectedPost = watchedState.posts.find(({ id: postId }) => selectedPostId === postId);
-        selectedPost.visited = true;
-
-        watchedState.visitedPostsIds.push(selectedPostId);
-        watchedState.modal = {
-          title: selectedPost.title,
-          body: selectedPost.description,
-          href: selectedPost.link,
-        };
-      });
-
-      const requestForm = document.querySelector('#request-form');
-      requestForm.addEventListener('submit', (e) => {
+      form.addEventListener('submit', (e) => {
         e.preventDefault();
 
         const { value: url } = e.target.elements.addressInput;
@@ -138,7 +145,7 @@ export default () => {
                   );
                 });
               }
-              // to do: fix postsUpdate fucntion to skip if url lists empty
+              // to do: fix to skip postsUpdate function if urls list is empty
               watchedState.timeoutID = setTimeout(
                 updatePosts,
                 5000,
