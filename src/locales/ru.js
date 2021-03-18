@@ -9,7 +9,7 @@ export default {
       failed: 'Ошибка сети. Попробуйте позже.',
     },
     parseXML: {
-      error: 'RSS канал не найден.',
+      error: 'Ресурс не содержит валидный RSS',
     },
     feeds: 'Фиды',
     posts: {
