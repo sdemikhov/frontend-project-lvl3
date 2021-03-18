@@ -6,11 +6,11 @@ import fs from 'fs';
 import parseXML from '../src/xml-parser.js';
 import validateURL from '../src/validate-url.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const filename = fileURLToPath(import.meta.url);
+const dirname = path.dirname(filename);
 
-const getFixturePath = (filename) => path.join(__dirname, '__fixtures__', filename);
-const readFile = (filename) => fs.promises.readFile(getFixturePath(filename), 'utf-8');
+const getFixturePath = (name) => path.join(dirname, '__fixtures__', name);
+const readFile = (name) => fs.promises.readFile(getFixturePath(name), 'utf-8');
 
 test('parseXML(validXML)', () => {
   const readFixture = readFile('rss-feed.xml');

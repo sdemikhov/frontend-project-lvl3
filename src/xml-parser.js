@@ -1,12 +1,5 @@
 import i18n from 'i18next';
 
-class ParserError extends Error {
-  constructor(message) {
-    super(message);
-    this.name = 'ParserError';
-  }
-}
-
 const getClearContent = (element) => {
   if (element) {
     return element.textContent.trim();
@@ -21,7 +14,7 @@ export default (stringWithXML) => {
   const channel = doc.querySelector('channel');
 
   if (!channel) {
-    throw new ParserError(i18n.t('parseXML.error'));
+    throw new Error(i18n.t('parseXML.error'));
   }
 
   const title = channel.querySelector('title');

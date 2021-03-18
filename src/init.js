@@ -93,11 +93,9 @@ export default () => {
 
               watchedState.feeds.push(feed);
 
-              let newPostId = watchedState.posts.length;
               watchedState.posts.push(...posts.map((post) => {
                 const newPost = { ...post };
-                newPost.id = newPostId;
-                newPostId += 1;
+                newPost.id = watchedState.posts.length;
                 return newPost;
               }));
               watchedState.requestForm.state = 'finished';
@@ -124,16 +122,14 @@ export default () => {
                   .catch(() => []));
                 Promise.all(promises).then((allPosts) => {
                   const newPosts = [...watchedState.posts];
-                  let newPostId = newPosts.length;
 
                   const flattened = _.flatten(allPosts);
                   flattened.forEach((post) => {
                     const samePost = newPosts.find((oldPost) => oldPost.link === post.link);
                     if (!samePost) {
                       const newPost = { ...post };
-                      newPost.id = newPostId;
+                      newPost.id = newPosts.length;
                       newPosts.push(newPost);
-                      newPostId += 1;
                     }
                   });
                   watchedState.posts = newPosts;
