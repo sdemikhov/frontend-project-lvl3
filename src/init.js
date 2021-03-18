@@ -93,11 +93,15 @@ export default () => {
 
               watchedState.feeds.push(feed);
 
-              watchedState.posts.push(...posts.map((post) => {
+              const idStartCount = watchedState.posts.length;
+
+              const newPosts = posts.reduce((acc, post) => {
                 const newPost = { ...post };
-                newPost.id = watchedState.posts.length;
-                return newPost;
-              }));
+                newPost.id = idStartCount + acc.length;
+                return [...acc, newPost];
+              }, []);
+
+              watchedState.posts = [...watchedState.posts, ...newPosts];
               watchedState.requestForm.state = 'finished';
             })
             .catch((err) => {
@@ -121,18 +125,21 @@ export default () => {
                   })
                   .catch(() => []));
                 Promise.all(promises).then((allPosts) => {
-                  const newPosts = [...watchedState.posts];
+                  const idStartCount = watchedState.posts.length;
 
-                  const flattened = _.flatten(allPosts);
-                  flattened.forEach((post) => {
-                    const samePost = newPosts.find((oldPost) => oldPost.link === post.link);
+                  const newPosts = [];
+                  _.flatten(allPosts).forEach((post) => {
+                    const samePost = watchedState.posts.find(
+                      (oldPost) => oldPost.link === post.link,
+                    );
                     if (!samePost) {
                       const newPost = { ...post };
-                      newPost.id = newPosts.length;
+                      newPost.id = idStartCount + newPosts.length;
                       newPosts.push(newPost);
                     }
                   });
-                  watchedState.posts = newPosts;
+
+                  watchedState.posts = [...watchedState.posts, ...newPosts];
 
                   watchedState.timeoutID = setTimeout(
                     updatePosts,
