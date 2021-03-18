@@ -14,13 +14,7 @@ const DEFAULT_LANGUAGE = 'ru';
 const routes = {
   allOrigins: (url) => {
     const encoded = encodeURIComponent(url);
-    return `https://hexlet-allorigins.herokuapp.com/get?disableCache=true&url=${encoded}`;
-  },
-};
-
-const errorMessages = {
-  network: {
-    message: i18n.t('downloadFeed.failed'),
+    return `https://aaahexlet-allorigins.herokuapp.com/get?disableCache=true&url=${encoded}`;
   },
 };
 
@@ -103,8 +97,11 @@ export default () => {
             })
             .catch((err) => {
               watchedState.requestForm.state = 'failed';
+              // to do: fix error translation
               if (axios.isAxiosError(err)) {
-                watchedState.requestForm.errors.push(errorMessages.network);
+                watchedState.requestForm.errors.push({
+                  message: i18n.t('downloadFeed.failed'),
+                });
               } else {
                 watchedState.requestForm.errors.push(err);
               }
@@ -141,6 +138,7 @@ export default () => {
                   );
                 });
               }
+              // to do: fix postsUpdate fucntion to skip if url lists empty
               watchedState.timeoutID = setTimeout(
                 updatePosts,
                 5000,

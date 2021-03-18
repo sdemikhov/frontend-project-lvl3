@@ -6,7 +6,7 @@ export default {
     },
     downloadFeed: {
       success: 'RSS успешно загружен',
-      failed: 'Ошибка сети. Попробуйте позже.',
+      failed: 'Ошибка сети',
     },
     parseXML: {
       error: 'Ресурс не содержит валидный RSS',
