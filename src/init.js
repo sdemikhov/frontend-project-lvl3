@@ -14,7 +14,7 @@ const DEFAULT_LANGUAGE = 'ru';
 const routes = {
   allOrigins: (url) => {
     const encoded = encodeURIComponent(url);
-    return `https://aaahexlet-allorigins.herokuapp.com/get?disableCache=true&url=${encoded}`;
+    return `https://hexlet-allorigins.herokuapp.com/get?disableCache=true&url=${encoded}`;
   },
 };
 
