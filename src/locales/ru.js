@@ -19,7 +19,7 @@ export default {
     validation: {
       required: 'Необходимо заполнить поле.',
       url: 'Ссылка должна быть валидным URL',
-      notOneOf: 'RSS канал уже добавлен.',
+      notOneOf: 'RSS уже существует',
     },
     page: {
       mainHeader: ['RSS Агрегатор'],
