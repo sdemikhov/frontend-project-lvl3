@@ -2,6 +2,7 @@ import i18n from 'i18next';
 import onChange from 'on-change';
 import axios from 'axios';
 import _ from 'lodash';
+import $ from 'jquery';
 
 import view from './view.js';
 import resources from './locales/locales.js';
@@ -49,10 +50,9 @@ export default () => {
         });
       });
 
-      const modal = document.querySelector('#modal');
-      modal.addEventListener('show.bs.modal', (e) => {
-        const button = e.relatedTarget;
-        const selectedPostId = parseInt(button.dataset.id, 10);
+      $('#modal').on('show.bs.modal', (event) => {
+        const button = $(event.relatedTarget);
+        const selectedPostId = parseInt(button.data('id'), 10);
         const selectedPost = watchedState.posts.find(({ id: postId }) => selectedPostId === postId);
         selectedPost.visited = true;
 
@@ -124,7 +124,7 @@ export default () => {
 
                   const flattened = _.flatten(allPosts);
                   flattened.forEach((post) => {
-                    const samePost = newPosts.find((oldPost) => oldPost.title === post.title);
+                    const samePost = newPosts.find((oldPost) => oldPost.link === post.link);
                     if (!samePost) {
                       const newPost = { ...post };
                       newPost.id = newPostId;
