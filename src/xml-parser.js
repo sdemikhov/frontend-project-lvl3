@@ -1,5 +1,3 @@
-import i18n from 'i18next';
-
 const getClearContent = (element) => {
   if (element) {
     return element.textContent.trim();
@@ -14,7 +12,9 @@ export default (stringWithXML) => {
   const channel = doc.querySelector('channel');
 
   if (!channel) {
-    throw new Error(i18n.t('parseXML.error'));
+    const parserError = new Error();
+    parserError.message = { ...parserError.message, localization: { key: 'parseXML.error' } };
+    throw parserError;
   }
 
   const title = channel.querySelector('title');

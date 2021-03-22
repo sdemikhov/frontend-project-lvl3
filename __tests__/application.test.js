@@ -92,6 +92,24 @@ describe('RSS Reader displays messages:', () => {
     .then((nodeWithExistanceErrorMessage) => {
       expect(nodeWithExistanceErrorMessage).toBeInTheDocument();
     }));
+
+  test('then provided valid URL and downloaded invalid XML/HTML should display error message', () => readFile('rss-feed-without-channel-tag.xml')
+    .then((fixtureContent) => {
+      const response = { contents: fixtureContent };
+
+      nock('https://hexlet-allorigins.herokuapp.com')
+        .persist()
+        .get(/.*/)
+        .reply(200, response);
+
+      userEvent.type(screen.getByRole('textbox', { name: 'url' }), 'http://invalidxml.example.com');
+      userEvent.click(screen.getByRole('button', { name: 'add' }));
+
+      return screen.findByText(/Ресурс не содержит валидный RSS/i);
+    })
+    .then((nodeWithInvalidXMLErrorMessage) => {
+      expect(nodeWithInvalidXMLErrorMessage).toBeInTheDocument();
+    }));
 });
 
 describe('RSS Reader disables form controls', () => {
