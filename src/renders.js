@@ -1,11 +1,17 @@
 /* eslint-disable no-param-reassign, */
-import i18n from 'i18next';
 
 import resources from './locales/locales.js';
 
-const renderErrors = (errors, elements) => {
+const renderErrors = (errors, elements, i18nextInstance) => {
   if (errors.length > 0) {
-    const messages = errors.map(({ message }) => message);
+    const messages = errors.map(({ message }) => {
+      const { localization } = message;
+
+      if (localization) {
+        return i18nextInstance.t(localization.key);
+      }
+      return message;
+    });
 
     elements.feedback.classList.add('text-danger');
     elements.feedback.textContent = messages.join(', ');
@@ -21,7 +27,7 @@ const renderErrors = (errors, elements) => {
   }
 };
 
-const processFormState = (value, elements) => {
+const processFormState = (value, elements, i18nextInstance) => {
   if (value === 'filling') {
     elements.submit.disabled = false;
     elements.input.readOnly = false;
@@ -41,12 +47,18 @@ const processFormState = (value, elements) => {
     elements.form.reset();
 
     elements.feedback.classList.add('text-success');
-    elements.feedback.textContent = i18n.t('downloadFeed.success');
+    elements.feedback.textContent = i18nextInstance.t('downloadFeed.success');
   }
 };
 
-const changeLanguage = (code, elements) => {
-  i18n.changeLanguage(code);
+const changeLanguage = (state, elements, i18nextInstance) => {
+  const { errors } = state.requestForm;
+  const { language: code } = state;
+  const { state: formState } = state.requestForm;
+
+  i18nextInstance.changeLanguage(code);
+  renderErrors(errors, elements, i18nextInstance);
+  processFormState(formState, elements, i18nextInstance);
 
   elements.changeLanguageButtons.forEach((button) => {
     const { language } = button.dataset;
@@ -100,7 +112,7 @@ const createFeedsEl = (feeds) => {
   return postsUl;
 };
 
-const createPostsEl = (posts, state) => {
+const createPostsEl = (posts, state, i18nextInstance) => {
   const postsUl = document.createElement('ul');
   postsUl.classList.add('list-group');
 
@@ -128,7 +140,7 @@ const createPostsEl = (posts, state) => {
       const postButton = document.createElement('button');
       postButton.dataset.translate = 'viewPostButton';
       postButton.classList.add('btn', 'btn-primary', 'btn-sm');
-      postButton.textContent = i18n.t('posts.view');
+      postButton.textContent = i18nextInstance.t('posts.view');
       postButton.dataset.id = post.id;
       postButton.setAttribute('data-toggle', 'modal');
       postButton.setAttribute('data-target', '#modal');
@@ -146,21 +158,21 @@ const createPostsEl = (posts, state) => {
   return postsUl;
 };
 
-const renderFeeds = (feeds, elements) => {
+const renderFeeds = (feeds, elements, i18nextInstance) => {
   const feedsHeader = document.createElement('h2');
   feedsHeader.dataset.translate = 'feedsHeader';
-  feedsHeader.textContent = i18n.t('feeds');
+  feedsHeader.textContent = i18nextInstance.t('feeds');
   const feedsEl = createFeedsEl(feeds);
 
   elements.feedsContainer.innerHTML = '';
   elements.feedsContainer.append(feedsHeader, feedsEl);
 };
 
-const renderPosts = (posts, elements, state) => {
+const renderPosts = (posts, elements, state, i18nextInstance) => {
   const postsHeader = document.createElement('h2');
   postsHeader.dataset.translate = 'postsHeader';
-  postsHeader.textContent = i18n.t('posts.header');
-  const postsEl = createPostsEl(posts, state);
+  postsHeader.textContent = i18nextInstance.t('posts.header');
+  const postsEl = createPostsEl(posts, state, i18nextInstance);
 
   elements.postsContainer.innerHTML = '';
   elements.postsContainer.append(postsHeader, postsEl);

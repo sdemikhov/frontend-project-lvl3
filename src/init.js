@@ -30,7 +30,9 @@ export default () => {
     visitedPostsIds: new Set(),
   };
 
-  i18n.init({ lng: DEFAULT_LANGUAGE, resources })
+  const i18nextInstance = i18n.createInstance();
+
+  i18nextInstance.init({ lng: DEFAULT_LANGUAGE, resources })
     .then(() => {
       const form = document.querySelector('#request-form');
       const input = form.querySelector('#addressInput');
@@ -57,7 +59,7 @@ export default () => {
         modalBody,
         modalA,
       };
-      const watchedState = buildwatchedState(state, elements);
+      const watchedState = buildwatchedState(state, elements, i18nextInstance);
 
       changeLanguageButtons.forEach((button) => {
         button.addEventListener('click', (e) => {
@@ -106,17 +108,21 @@ export default () => {
             })
             .catch((err) => {
               watchedState.requestForm.state = 'failed';
-              // to do: fix error translation
               if (axios.isAxiosError(err)) {
-                watchedState.requestForm.errors.push({
-                  message: i18n.t('downloadFeed.failed'),
-                });
+                const networkError = { ...err };
+                networkError.message = { ...networkError.message, localization: { key: 'downloadFeed.failed' } };
+                watchedState.requestForm.errors.push(networkError);
               } else {
                 watchedState.requestForm.errors.push(err);
               }
+              return err;
             })
-            .then(() => {
-              function updatePosts(urls) {
+            .then((err) => {
+              if (err) {
+                return;
+              }
+
+              const updatePosts = (urls) => {
                 const promises = urls.map((feedURL) => axios
                   .get(routes.allOrigins(feedURL))
                   .then((resp) => {
@@ -147,8 +153,7 @@ export default () => {
                     watchedState.feeds.map((feed) => feed.link),
                   );
                 });
-              }
-              // to do: fix to skip postsUpdate function if urls list is empty
+              };
               watchedState.timeoutID = setTimeout(
                 updatePosts,
                 5000,

@@ -8,8 +8,7 @@
     "test": "npx jest --colors"
   },
   "jest": {
-    "verbose": true,
-    "testURL": "http://localhost"
+
   },
   "repository": {
     "type": "git",
@@ -25,18 +24,20 @@
     "@babel/core": "^7.13.8",
     "@babel/preset-env": "^7.13.10",
     "@jest/globals": "^26.6.2",
+    "@testing-library/dom": "^7.30.0",
+    "@testing-library/jest-dom": "^5.11.9",
+    "@testing-library/user-event": "^13.0.6",
     "babel-loader": "^8.2.2",
     "css-loader": "^5.1.1",
     "eslint": "^7.21.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-jest": "^24.1.5",
-    "favicons": "^6.2.1",
-    "favicons-webpack-plugin": "^5.0.2",
     "html-webpack-plugin": "^5.2.0",
     "jest": "^26.6.3",
     "jest-cli": "^26.6.3",
     "mini-css-extract-plugin": "^1.3.9",
+    "nock": "^13.0.11",
     "postcss": "^8.2.6",
     "postcss-loader": "^5.0.0",
     "sass": "^1.32.8",
@@ -50,10 +51,8 @@
     "axios": "^0.21.1",
     "bootstrap": "^4.6.0",
     "i18next": "^19.9.1",
-    "jquery": "^3.6.0",
     "lodash": "^4.17.21",
     "on-change": "^2.2.3",
-    "popper.js": "^1.16.1",
     "yup": "^0.32.9"
   }
 }

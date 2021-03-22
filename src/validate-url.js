@@ -1,13 +1,21 @@
 import * as yup from 'yup';
-import i18n from 'i18next';
 
-// to do: fix error translation
+yup.setLocale({
+  mixed: {
+    notOneOf: () => ({ localization: { key: 'validation.notOneOf' } }),
+  },
+  string: {
+    required: () => ({ localization: { key: 'validation.required' } }),
+    url: () => ({ localization: { key: 'validation.url' } }),
+  },
+});
+
 export default (url, downloadedURLS) => {
   const schema = yup
     .string()
-    .required(i18n.t('validation.required'))
-    .url(i18n.t('validation.url'))
-    .notOneOf(downloadedURLS, i18n.t('validation.notOneOf'));
+    .required()
+    .url()
+    .notOneOf(downloadedURLS);
   return schema
     .validate(url, { abortEarly: false })
     .then(() => [])

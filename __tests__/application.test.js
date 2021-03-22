@@ -1,10 +1,20 @@
-import { test, expect } from '@jest/globals';
+import {
+  test, expect, beforeEach, describe, beforeAll, afterAll, afterEach,
+} from '@jest/globals';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
+import testingLibrary from '@testing-library/dom';
+import userEventHelpers from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import nock from 'nock';
+import axios from 'axios';
+import adapter from 'axios/lib/adapters/http';
 
-import parseXML from '../src/xml-parser.js';
-import validateURL from '../src/validate-url.js';
+import init from '../src/init.js';
+
+const { screen, waitFor } = testingLibrary;
+const userEvent = userEventHelpers.default;
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -12,39 +22,96 @@ const dirname = path.dirname(filename);
 const getFixturePath = (name) => path.join(dirname, '__fixtures__', name);
 const readFile = (name) => fs.promises.readFile(getFixturePath(name), 'utf-8');
 
-test('parseXML(validXML)', () => {
-  const readFixture = readFile('rss-feed.xml');
-  const readResult = readFile('parsed-xml-result.json');
-
-  return Promise.all([readFixture, readResult])
-    .then(([stringWithXML, stringWithJSON]) => {
-      const actual = parseXML(stringWithXML);
-      const expected = JSON.parse(stringWithJSON, 'utf-8');
-      expect(actual).toEqual(expected);
-    });
+beforeAll(() => {
+  axios.defaults.adapter = adapter;
+  nock.disableNetConnect();
 });
 
-test('parseXML()', () => {
-  expect(() => parseXML()).toThrow();
+afterAll(() => {
+  nock.enableNetConnect();
 });
 
-test.each([
-  [
-    'http://unique.example.com',
-    ['http://a.example.com', 'http://b.example.com'],
-    true,
-  ],
-  [
-    '',
-    [],
-    false,
-  ],
-  [
-    'http://notunique.example.com',
-    ['http://a.example.com', 'http://notunique.example.com'],
-    false,
-  ],
-])('validateURL(%s, %s)', (url, downloadedURLS, result) => (
-  validateURL(url, downloadedURLS)
-    .then((errors) => expect(errors.length === 0).toBe(result))
+beforeEach(() => (fs.promises
+  .readFile(path.join(dirname, '..', 'index.html'), 'utf-8')
+  .then((initHtml) => {
+    document.body.innerHTML = initHtml.toString();
+    return init();
+  })
 ));
+
+afterEach(() => {
+  nock.cleanAll();
+  document.body.innerHTML = '';
+});
+
+describe('RSS Reader displays messages:', () => {
+  test('then provided invalid URL should display error message', () => {
+    userEvent.type(screen.getByRole('textbox', { name: 'url' }), 'www.urlwithoutschema.example.com');
+    userEvent.click(screen.getByRole('button', { name: 'add' }));
+
+    return screen.findByText(/Ссылка должна быть валидным URL/i)
+      .then((nodeWithInvalidUrlMessage) => {
+        expect(nodeWithInvalidUrlMessage).toBeInTheDocument();
+      });
+  });
+
+  test('then provided valid URL and network error occurs should display error message', () => {
+    nock('https://hexlet-allorigins.herokuapp.com')
+      .get(/.*/)
+      .reply(500, 'Servers are crashed.');
+
+    userEvent.type(screen.getByRole('textbox', { name: 'url' }), 'http://networkerror.example.com');
+    userEvent.click(screen.getByRole('button', { name: 'add' }));
+
+    return screen.findByText(/Ошибка сети/i)
+      .then((nodeWithNetworkerror) => {
+        expect(nodeWithNetworkerror).toBeInTheDocument();
+      });
+  });
+
+  test('then provided valid URL should display success message, if provide same URL should display error message', () => readFile('rss-unupdatable-feed.xml')
+    .then((fixtureContent) => {
+      const response = { contents: fixtureContent };
+
+      nock('https://hexlet-allorigins.herokuapp.com')
+        .persist()
+        .get(/.*/)
+        .reply(200, response);
+
+      userEvent.type(screen.getByRole('textbox', { name: 'url' }), 'http://example.com');
+      userEvent.click(screen.getByRole('button', { name: 'add' }));
+
+      return screen.findByText(/RSS успешно загружен/i);
+    })
+    .then((nodeWithSuccessMessage) => expect(nodeWithSuccessMessage).toBeInTheDocument())
+    .then(() => {
+      userEvent.type(screen.getByRole('textbox', { name: 'url' }), 'http://example.com');
+      userEvent.click(screen.getByRole('button', { name: 'add' }));
+      return screen.findByText(/RSS уже существует/i);
+    })
+    .then((nodeWithExistanceErrorMessage) => {
+      expect(nodeWithExistanceErrorMessage).toBeInTheDocument();
+    }));
+});
+
+describe('RSS Reader disables form controls', () => {
+  test('Then network request is sending, should disable form controls', () => readFile('rss-unupdatable-feed.xml')
+    .then((fixtureContent) => {
+      const response = { contents: fixtureContent };
+
+      nock('https://hexlet-allorigins.herokuapp.com')
+        .persist()
+        .get(/.*/)
+        .reply(200, response);
+
+      userEvent.type(screen.getByRole('textbox', { name: 'url' }), 'http://example.com');
+      userEvent.click(screen.getByRole('button', { name: 'add' }));
+
+      return waitFor(() => {
+        expect(screen.getByRole('textbox', { name: 'url' })).toHaveAttribute('readonly');
+      });
+    })
+    .then(() => {
+      expect(screen.getByRole('button', { name: 'add' })).toBeDisabled();
+    }));
+});

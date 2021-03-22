@@ -1,7 +1,6 @@
 import path from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
-import FaviconsWebpackPlugin from 'favicons-webpack-plugin';
 import { fileURLToPath } from 'url';
 
 const filename = fileURLToPath(import.meta.url);
@@ -17,11 +16,11 @@ export default {
   plugins: [
     new HtmlWebpackPlugin({
       template: './index.html',
+      favicon: './src/images/favicon.ico',
     }),
     new MiniCssExtractPlugin({
       filename: 'styles.css',
     }),
-    new FaviconsWebpackPlugin('./src/images/logo.png'),
   ],
   module: {
     rules: [
