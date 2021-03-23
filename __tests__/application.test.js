@@ -133,3 +133,90 @@ describe('RSS Reader disables form controls', () => {
       expect(screen.getByRole('button', { name: 'add' })).toBeDisabled();
     }));
 });
+
+describe('RSS Reader display posts:', () => {
+  test('then provided valid URL should display feed with posts and fill modal', () => {
+    const filenames = [
+      'rss-unupdatable-feed.xml',
+      'rss-updatable-feed-first-request.xml',
+      'rss-updatable-feed-last-request.xml',
+    ];
+
+    const promises = filenames.map(readFile);
+    return Promise.all(promises)
+      .then(([unupdatableFeedContent, updatableFeedFirstContent, updatableFeedLastContent]) => {
+        const responseForUnupdatable = { contents: unupdatableFeedContent };
+        const responseForUpdatableFirst = { contents: updatableFeedFirstContent };
+        const responseForUpdatableLast = { contents: updatableFeedLastContent };
+        nock('https://hexlet-allorigins.herokuapp.com')
+          .persist()
+          .get(/unupdatablefeed/)
+          .reply(201, responseForUnupdatable);
+
+        nock('https://hexlet-allorigins.herokuapp.com')
+          .get(/feedupdatable/)
+          .reply(201, responseForUpdatableFirst);
+
+        nock('https://hexlet-allorigins.herokuapp.com')
+          .persist()
+          .get(/feedupdatable/)
+          .reply(201, responseForUpdatableLast);
+
+        userEvent.type(screen.getByRole('textbox', { name: 'url' }), 'http://unupdatablefeed.example.com');
+        userEvent.click(screen.getByRole('button', { name: 'add' }));
+
+        return waitFor(() => {
+          expect(screen.getByText(/Lorem ipsum feed for an interval of 1 years with 2 item\(s\)/)).toBeInTheDocument();
+          expect(screen.getByText(/This is a nonupdating lorem ipsum feed/)).toBeInTheDocument();
+
+          expect(screen.getByRole('link', { name: /Lorem ipsum 2021-01-01T00:00:00Z/i })).toBeInTheDocument();
+          expect(screen.getByRole('link', { name: /Lorem ipsum 2020-01-01T00:00:00Z/i })).toBeInTheDocument();
+        });
+      })
+      .then(() => {
+        userEvent.type(screen.getByRole('textbox', { name: 'url' }), 'http://feedupdatablefeed.example.com');
+        userEvent.click(screen.getByRole('button', { name: 'add' }));
+
+        return waitFor(() => {
+          expect(screen.getByText(/Lorem ipsum feed for an interval of 1 minutes with 2 item\(s\)/)).toBeInTheDocument();
+          expect(screen.getByText(/Lorem ipsum feed for an interval of 1 years with 2 item\(s\)/)).toBeInTheDocument();
+
+          expect(screen.getByText(/This is a constantly updating lorem ipsum feed/)).toBeInTheDocument();
+          expect(screen.getByText(/This is a nonupdating lorem ipsum feed/)).toBeInTheDocument();
+
+          expect(screen.getByRole('link', { name: /Lorem ipsum 2021-03-23T13:28:00Z/i })).toBeInTheDocument();
+          expect(screen.getByRole('link', { name: /Lorem ipsum 2021-03-23T13:27:00Z/i })).toBeInTheDocument();
+          expect(screen.getByRole('link', { name: /Lorem ipsum 2021-01-01T00:00:00Z/i })).toBeInTheDocument();
+          expect(screen.getByRole('link', { name: /Lorem ipsum 2020-01-01T00:00:00Z/i })).toBeInTheDocument();
+        });
+      })
+      .then(() => (waitFor(() => {
+        expect(screen.getByText(/Lorem ipsum feed for an interval of 1 minutes with 2 item\(s\)/)).toBeInTheDocument();
+        expect(screen.getByText(/Lorem ipsum feed for an interval of 1 years with 2 item\(s\)/)).toBeInTheDocument();
+        expect(screen.getAllByText(/Lorem ipsum feed/).length).toBe(2);
+
+        expect(screen.getByText(/This is a constantly updating lorem ipsum feed/)).toBeInTheDocument();
+        expect(screen.getByText(/This is a nonupdating lorem ipsum feed/)).toBeInTheDocument();
+
+        expect(screen.getByRole('link', { name: /Lorem ipsum 2021-03-23T13:29:00Z/i })).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: /Lorem ipsum 2021-03-23T13:28:00Z/i })).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: /Lorem ipsum 2021-03-23T13:27:00Z/i })).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: /Lorem ipsum 2021-01-01T00:00:00Z/i })).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: /Lorem ipsum 2020-01-01T00:00:00Z/i })).toBeInTheDocument();
+        expect(screen.getAllByRole('link', { name: /Lorem ipsum \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z/i }).length).toBe(5);
+      }, { timeout: 8000 })
+      ))
+      .then(() => {
+        const previewButtons = screen.getAllByRole('button', { name: /Просмотр/i });
+        expect(previewButtons.length).toBe(5);
+
+        expect(screen.getByRole('link', { name: /Lorem ipsum 2021-03-23T13:29:00Z/i })).toHaveClass('font-weight-bold');
+        userEvent.click(previewButtons[0]);
+        return screen.findByText('Aliquip proident non ut veniam.');
+      })
+      .then((nodeWithDescriptionInsideModal) => {
+        expect(nodeWithDescriptionInsideModal).toBeVisible();
+        expect(screen.getByRole('link', { name: /Lorem ipsum 2021-03-23T13:29:00Z/i })).not.toHaveClass('font-weight-bold');
+      });
+  }, 10000);
+});
