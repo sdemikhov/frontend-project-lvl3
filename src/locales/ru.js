@@ -23,7 +23,7 @@ export default {
     },
     page: {
       mainHeader: ['RSS Агрегатор'],
-      addressHelp: ['Пример: https://ru.hexlet.io/lessons.rss'],
+      addressHelp: ['Пример: http://lorem-rss.herokuapp.com/feed'],
       addressInput: ['placeholder', 'RSS ссылка'],
       buttonAdd: ['Добавить'],
       feedsHeader: ['Фиды'],
