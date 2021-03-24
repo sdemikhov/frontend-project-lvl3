@@ -61,7 +61,7 @@ describe('Validate URL function', () => {
   ])('Then called with %s', (description, url, downloadedURLS, result) => {
     test(`should return errors array, check it for zero length is ${result}`, () => {
       const { validateURL } = validators;
-      validateURL(url, downloadedURLS)
+      return validateURL(url, downloadedURLS)
         .then((errors) => expect(errors.length === 0).toBe(result));
     });
   });
