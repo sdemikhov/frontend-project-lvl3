@@ -10,12 +10,12 @@ export default (state, elements, i18nextInstance) => {
     }
 
     if (path === 'requestForm.state') {
-      renders.processFormState(value, elements, i18nextInstance);
+      renders.renderFormState(value, elements, i18nextInstance);
       return;
     }
 
     if (path === 'language') {
-      renders.changeLanguage(watchedState, elements, i18nextInstance);
+      renders.renderLanguageChange(watchedState, elements, i18nextInstance);
       return;
     }
 

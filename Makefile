@@ -11,9 +11,12 @@ build:
 test:
 	npm test
 
+test-coverage:
+	npm test -- --coverage --coverageProvider=v8
+
 lint:
 	npx eslint .
 
 check: lint test build
 
-.PHONY: develop install build test lint check
+.PHONY: develop install build test test-coverage lint check

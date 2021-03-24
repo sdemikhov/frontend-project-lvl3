@@ -3,3 +3,4 @@
 dist
 assets
 .DS_Store
+coverage

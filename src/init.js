@@ -1,8 +1,8 @@
 import i18n from 'i18next';
 
-import buildAddFeed from './addFeed.js';
-import buildwatchedState from './watcher.js';
+import buildwatchedState from './watchers.js';
 import resources from './locales/locales.js';
+import handlers from './handlers.js';
 
 const DEFAULT_LANGUAGE = 'ru';
 
@@ -51,12 +51,9 @@ export default () => {
       const watchedState = buildwatchedState(state, elements, i18nextInstance);
 
       changeLanguageButtons.forEach((button) => {
-        button.addEventListener('click', (e) => {
-          const { language } = e.target.dataset;
-          watchedState.language = language;
-        });
+        button.addEventListener('click', handlers.handleChangeLanguageClick(watchedState));
       });
 
-      form.addEventListener('submit', buildAddFeed(watchedState));
+      form.addEventListener('submit', handlers.handleFormSubmit(watchedState));
     });
 };

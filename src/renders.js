@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign, */
-
+import handlers from './handlers.js';
 import resources from './locales/locales.js';
 
 const renderErrors = (errors, elements, i18nextInstance) => {
@@ -27,7 +27,7 @@ const renderErrors = (errors, elements, i18nextInstance) => {
   }
 };
 
-const processFormState = (value, elements, i18nextInstance) => {
+const renderFormState = (value, elements, i18nextInstance) => {
   if (value === 'filling') {
     elements.submit.disabled = false;
     elements.input.readOnly = false;
@@ -51,14 +51,14 @@ const processFormState = (value, elements, i18nextInstance) => {
   }
 };
 
-const changeLanguage = (state, elements, i18nextInstance) => {
+const renderLanguageChange = (state, elements, i18nextInstance) => {
   const { errors } = state.requestForm;
   const { language: code } = state;
   const { state: formState } = state.requestForm;
 
   i18nextInstance.changeLanguage(code);
   renderErrors(errors, elements, i18nextInstance);
-  processFormState(formState, elements, i18nextInstance);
+  renderFormState(formState, elements, i18nextInstance);
 
   elements.changeLanguageButtons.forEach((button) => {
     const { language } = button.dataset;
@@ -144,12 +144,7 @@ const createPostsEl = (posts, state, i18nextInstance) => {
       postButton.dataset.id = post.id;
       postButton.setAttribute('data-toggle', 'modal');
       postButton.setAttribute('data-target', '#modal');
-      postButton.addEventListener('click', (e) => {
-        const button = e.target;
-        const selectedPostId = parseInt(button.dataset.id, 10);
-        state.postIdForModal = selectedPostId;
-        state.visitedPostsIds.add(selectedPostId);
-      });
+      postButton.addEventListener('click', handlers.handlePostPreviewClick(state));
 
       postsLi.append(postA, postButton);
       postsUl.prepend(postsLi);
@@ -192,8 +187,8 @@ const renderModal = (selectedPostId, elements, state) => {
 
 export default {
   renderErrors,
-  processFormState,
-  changeLanguage,
+  renderFormState,
+  renderLanguageChange,
   renderFeeds,
   renderPosts,
   renderModal,
