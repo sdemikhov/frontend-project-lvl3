@@ -36,7 +36,7 @@ export default (stringWithXML) => {
     post.description = getClearContent(itemDescriptionEl);
 
     const itemLinkEl = itemEl.querySelector('link');
-    post.link = getClearContent(itemLinkEl);
+    post.url = getClearContent(itemLinkEl);
 
     posts.unshift(post);
   });

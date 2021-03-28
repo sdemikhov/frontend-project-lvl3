@@ -134,7 +134,7 @@ const createPostsEl = (posts, state, i18nextInstance) => {
       }
 
       postA.textContent = post.title;
-      postA.setAttribute('href', post.link);
+      postA.setAttribute('href', post.url);
       postA.dataset.id = post.id;
 
       const postButton = document.createElement('button');
@@ -178,7 +178,7 @@ const renderModal = (selectedPostId, elements, state) => {
 
   elements.modalTitle.textContent = selectedPost.title;
   elements.modalBody.textContent = selectedPost.description;
-  elements.modalA.setAttribute('href', selectedPost.link);
+  elements.modalA.setAttribute('href', selectedPost.url);
 
   const a = elements.postsContainer.querySelector(`a[data-id="${selectedPostId}"]`);
   a.classList.remove('font-weight-bold');

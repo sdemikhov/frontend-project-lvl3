@@ -17,7 +17,7 @@ const DEFAULT_UPDATE_TIMEOUT = 5000;
 const addFeedWithPosts = (state, url) => axios.get(routes.allOrigins(url))
   .then((response) => {
     const [feed, posts] = parseRSS(response.data.contents);
-    feed.link = url;
+    feed.url = url;
 
     state.feeds.push(feed);
 
@@ -48,7 +48,7 @@ const addFeedWithPosts = (state, url) => axios.get(routes.allOrigins(url))
   });
 
 const updatePosts = (state) => {
-  const addedURLS = state.feeds.map((feed) => feed.link);
+  const addedURLS = state.feeds.map((feed) => feed.url);
   const promises = addedURLS.map((feedURL) => axios
     .get(routes.allOrigins(feedURL))
     .then((resp) => {
@@ -63,7 +63,7 @@ const updatePosts = (state) => {
     const newPosts = [];
     _.flatten(allPosts).forEach((post) => {
       const samePost = state.posts.find(
-        (oldPost) => oldPost.link === post.link,
+        (oldPost) => oldPost.url === post.url,
       );
       if (!samePost) {
         const newPost = { ...post };
@@ -83,7 +83,7 @@ const handleFormSubmit = (state) => (e) => {
 
   const { value: url } = e.target.elements.addressInput;
 
-  const addedURLS = state.feeds.map(({ link }) => link);
+  const addedURLS = state.feeds.map((feed) => feed.url);
 
   const { validateURL } = validators;
   validateURL(url, addedURLS).then((errors) => {
