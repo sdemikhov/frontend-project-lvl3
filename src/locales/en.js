@@ -24,7 +24,7 @@ export default {
     page: {
       mainHeader: ['RSS Aggregator'],
       addressHelp: ['Example: http://lorem-rss.herokuapp.com/feed'],
-      addressInput: ['placeholder', 'RSS link'],
+      addressInput: ['placeholder', 'RSS URL'],
       buttonAdd: ['Add'],
       feedsHeader: ['Feeds'],
       postsHeader: ['Posts'],
