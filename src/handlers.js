@@ -5,16 +5,16 @@ import _ from 'lodash';
 import parseRSS from './rss-channel.js';
 import validators from './validators.js';
 
-const routes = {
-  allOrigins: (url) => {
-    const encoded = encodeURIComponent(url);
-    return `https://hexlet-allorigins.herokuapp.com/get?disableCache=true&url=${encoded}`;
-  },
+const getProxyUrl = (feedURL) => {
+  const result = new URL('get', 'https://hexlet-allorigins.herokuapp.com');
+  result.searchParams.append('disableCache', true);
+  result.searchParams.append('url', feedURL);
+  return result.toString();
 };
 
 const DEFAULT_UPDATE_TIMEOUT = 5000;
 
-const addFeedWithPosts = (state, url) => axios.get(routes.allOrigins(url))
+const addFeedWithPosts = (state, url) => axios.get(getProxyUrl(url))
   .then((response) => {
     const [feed, posts] = parseRSS(response.data.contents);
     feed.url = url;
@@ -50,7 +50,7 @@ const addFeedWithPosts = (state, url) => axios.get(routes.allOrigins(url))
 const updatePosts = (state) => {
   const addedURLS = state.feeds.map((feed) => feed.url);
   const promises = addedURLS.map((feedURL) => axios
-    .get(routes.allOrigins(feedURL))
+    .get(getProxyUrl(feedURL))
     .then((resp) => {
       const [, posts] = parseRSS(resp.data.contents);
       return posts;
@@ -81,7 +81,8 @@ const updatePosts = (state) => {
 const handleFormSubmit = (state) => (e) => {
   e.preventDefault();
 
-  const { value: url } = e.target.elements.addressInput;
+  const formData = new FormData(e.target);
+  const url = formData.get('url');
 
   const addedURLS = state.feeds.map((feed) => feed.url);
 
