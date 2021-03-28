@@ -31,9 +31,6 @@ export default () => {
       const feedsContainer = document.querySelector('#feeds');
       const postsContainer = document.querySelector('#posts');
       const modal = document.querySelector('#modal');
-      const modalTitle = modal.querySelector('.modal-title');
-      const modalBody = modal.querySelector('.modal-body');
-      const modalA = modal.querySelector('a');
 
       const elements = {
         form,
@@ -44,9 +41,6 @@ export default () => {
         feedsContainer,
         postsContainer,
         modal,
-        modalTitle,
-        modalBody,
-        modalA,
       };
       const watchedState = getWatchedState(state, elements, i18nextInstance);
 
@@ -55,5 +49,6 @@ export default () => {
       });
 
       form.addEventListener('submit', handlers.handleFormSubmit(watchedState));
+      postsContainer.addEventListener('click', handlers.handlePostPreviewClick(watchedState));
     });
 };

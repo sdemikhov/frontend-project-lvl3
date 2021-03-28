@@ -31,6 +31,7 @@ export default (state, elements, i18nextInstance) => {
 
     if (path === 'postIdForModal') {
       renders.renderModal(value, elements, watchedState);
+      renders.renderViewedPosts(value, elements);
     }
   });
 

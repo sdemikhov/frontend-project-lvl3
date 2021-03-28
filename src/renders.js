@@ -1,5 +1,4 @@
 /* eslint-disable no-param-reassign, */
-import handlers from './handlers.js';
 import resources from './locales/locales.js';
 
 const renderErrors = (errors, elements, i18nextInstance) => {
@@ -144,7 +143,6 @@ const createPostsEl = (posts, state, i18nextInstance) => {
       postButton.dataset.id = post.id;
       postButton.setAttribute('data-toggle', 'modal');
       postButton.setAttribute('data-target', '#modal');
-      postButton.addEventListener('click', handlers.handlePostPreviewClick(state));
 
       postsLi.append(postA, postButton);
       postsUl.prepend(postsLi);
@@ -176,10 +174,16 @@ const renderPosts = (posts, elements, state, i18nextInstance) => {
 const renderModal = (selectedPostId, elements, state) => {
   const selectedPost = state.posts.find(({ id: postId }) => selectedPostId === postId);
 
-  elements.modalTitle.textContent = selectedPost.title;
-  elements.modalBody.textContent = selectedPost.description;
-  elements.modalA.setAttribute('href', selectedPost.url);
+  const modalTitle = elements.modal.querySelector('.modal-title');
+  const modalBody = elements.modal.querySelector('.modal-body');
+  const modalA = elements.modal.querySelector('a');
 
+  modalTitle.textContent = selectedPost.title;
+  modalBody.textContent = selectedPost.description;
+  modalA.setAttribute('href', selectedPost.url);
+};
+
+const renderViewedPosts = (selectedPostId, elements) => {
   const a = elements.postsContainer.querySelector(`a[data-id="${selectedPostId}"]`);
   a.classList.remove('font-weight-bold');
   a.classList.add('font-weight-normal');
@@ -192,4 +196,5 @@ export default {
   renderFeeds,
   renderPosts,
   renderModal,
+  renderViewedPosts,
 };

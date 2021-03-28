@@ -113,7 +113,11 @@ const handleChangeLanguageClick = (state) => (e) => {
 };
 
 const handlePostPreviewClick = (state) => (e) => {
-  const button = e.target;
+  const button = e.target.closest('button');
+  if (!button) {
+    return;
+  }
+
   const selectedPostId = parseInt(button.dataset.id, 10);
   state.postIdForModal = selectedPostId;
   state.visitedPostsIds.add(selectedPostId);
