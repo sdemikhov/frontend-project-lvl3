@@ -1,6 +1,6 @@
 import i18n from 'i18next';
 
-import buildwatchedState from './watchers.js';
+import getWatchedState from './watchers.js';
 import resources from './locales/locales.js';
 import handlers from './handlers.js';
 
@@ -48,7 +48,7 @@ export default () => {
         modalBody,
         modalA,
       };
-      const watchedState = buildwatchedState(state, elements, i18nextInstance);
+      const watchedState = getWatchedState(state, elements, i18nextInstance);
 
       changeLanguageButtons.forEach((button) => {
         button.addEventListener('click', handlers.handleChangeLanguageClick(watchedState));

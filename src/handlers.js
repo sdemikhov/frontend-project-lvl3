@@ -2,7 +2,7 @@
 import axios from 'axios';
 import _ from 'lodash';
 
-import buildRSSChannel from './rss-channel.js';
+import parseRSS from './rss-channel.js';
 import validators from './validators.js';
 
 const routes = {
@@ -16,7 +16,7 @@ const DEFAULT_UPDATE_TIMEOUT = 5000;
 
 const addFeedWithPosts = (state, url) => axios.get(routes.allOrigins(url))
   .then((response) => {
-    const [feed, posts] = buildRSSChannel(response.data.contents);
+    const [feed, posts] = parseRSS(response.data.contents);
     feed.link = url;
 
     state.feeds.push(feed);
@@ -52,7 +52,7 @@ const updatePosts = (state) => {
   const promises = addedURLS.map((feedURL) => axios
     .get(routes.allOrigins(feedURL))
     .then((resp) => {
-      const [, posts] = buildRSSChannel(resp.data.contents);
+      const [, posts] = parseRSS(resp.data.contents);
       return posts;
     })
     .catch(() => []));

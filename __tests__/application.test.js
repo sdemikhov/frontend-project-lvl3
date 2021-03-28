@@ -199,10 +199,15 @@ describe('RSS Reader display posts:', () => {
         expect(screen.getByText(/This is a nonupdating lorem ipsum feed/)).toBeInTheDocument();
 
         expect(screen.getByRole('link', { name: /Lorem ipsum 2021-03-23T13:29:00Z/i })).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: /Lorem ipsum 2021-03-23T13:29:00Z/i })).toHaveAttribute('href', 'http://example.com/test/1616506140');
         expect(screen.getByRole('link', { name: /Lorem ipsum 2021-03-23T13:28:00Z/i })).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: /Lorem ipsum 2021-03-23T13:28:00Z/i })).toHaveAttribute('href', 'http://example.com/test/1616506080');
         expect(screen.getByRole('link', { name: /Lorem ipsum 2021-03-23T13:27:00Z/i })).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: /Lorem ipsum 2021-03-23T13:27:00Z/i })).toHaveAttribute('href', 'http://example.com/test/1616506020');
         expect(screen.getByRole('link', { name: /Lorem ipsum 2021-01-01T00:00:00Z/i })).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: /Lorem ipsum 2021-01-01T00:00:00Z/i })).toHaveAttribute('href', 'http://example.com/test/1609459200');
         expect(screen.getByRole('link', { name: /Lorem ipsum 2020-01-01T00:00:00Z/i })).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: /Lorem ipsum 2020-01-01T00:00:00Z/i })).toHaveAttribute('href', 'http://example.com/test/1577836800');
         expect(screen.getAllByRole('link', { name: /Lorem ipsum \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z/i }).length).toBe(5);
       }, { timeout: 8000 })
       ))
@@ -216,6 +221,7 @@ describe('RSS Reader display posts:', () => {
       })
       .then((nodeWithDescriptionInsideModal) => {
         expect(nodeWithDescriptionInsideModal).toBeVisible();
+        expect(screen.getByRole('button', { name: /Читать полностью/i, hidden: true })).toHaveAttribute('href', 'http://example.com/test/1616506140');
         expect(screen.getByRole('link', { name: /Lorem ipsum 2021-03-23T13:29:00Z/i })).not.toHaveClass('font-weight-bold');
       });
   }, 10000);
