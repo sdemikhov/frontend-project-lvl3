@@ -72,6 +72,7 @@ const handleFormSubmit = (state) => (e) => {
   const { validateURL } = validators;
   const error = validateURL(url, addedURLS);
   state.requestForm.error = error;
+  state.requestForm.state = 'failed';
 
   if (error) {
     return;

@@ -47,7 +47,7 @@ afterEach(() => {
 });
 
 describe('Immediately after loading:', () => {
-  test('Should not display feeds or posts', () => {
+  test('Should not display feeds or posts headers', () => {
     expect(screen.queryByText(/Фиды/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Посты/i)).not.toBeInTheDocument();
   });
@@ -59,6 +59,13 @@ describe('RSS Reader displays messages:', () => {
     userEvent.click(screen.getByRole('button', { name: 'add' }));
 
     return screen.findByText(/Ссылка должна быть валидным URL/i)
+      .then((nodeWithInvalidUrlMessage) => {
+        expect(nodeWithInvalidUrlMessage).toBeInTheDocument();
+      })
+      .then(() => {
+        userEvent.click(screen.getByRole('button', { name: /English/i }));
+        return screen.findByText(/Must contain a valid url./i);
+      })
       .then((nodeWithInvalidUrlMessage) => {
         expect(nodeWithInvalidUrlMessage).toBeInTheDocument();
       });
@@ -73,6 +80,12 @@ describe('RSS Reader displays messages:', () => {
     userEvent.click(screen.getByRole('button', { name: 'add' }));
 
     return screen.findByText(/Ошибка сети/i)
+      .then((nodeWithNetworkerror) => {
+        expect(nodeWithNetworkerror).toBeInTheDocument();
+      }).then(() => {
+        userEvent.click(screen.getByRole('button', { name: /English/i }));
+        return screen.findByText(/Network Problems. Try again./i);
+      })
       .then((nodeWithNetworkerror) => {
         expect(nodeWithNetworkerror).toBeInTheDocument();
       });
@@ -94,8 +107,22 @@ describe('RSS Reader displays messages:', () => {
     })
     .then((nodeWithSuccessMessage) => expect(nodeWithSuccessMessage).toBeInTheDocument())
     .then(() => {
+      userEvent.click(screen.getByRole('button', { name: /English/i }));
+      return screen.findByText(/RSS loaded successfully/i);
+    })
+    .then((nodeWithSuccessMessage) => {
+      expect(nodeWithSuccessMessage).toBeInTheDocument();
+    })
+    .then(() => {
       userEvent.type(screen.getByRole('textbox', { name: 'url' }), 'http://example.com');
       userEvent.click(screen.getByRole('button', { name: 'add' }));
+      return screen.findByText(/RSS channel already exist./i);
+    })
+    .then((nodeWithExistanceErrorMessage) => {
+      expect(nodeWithExistanceErrorMessage).toBeInTheDocument();
+    })
+    .then(() => {
+      userEvent.click(screen.getByRole('button', { name: /Русский/i }));
       return screen.findByText(/RSS уже существует/i);
     })
     .then((nodeWithExistanceErrorMessage) => {
@@ -115,6 +142,12 @@ describe('RSS Reader displays messages:', () => {
       userEvent.click(screen.getByRole('button', { name: 'add' }));
 
       return screen.findByText(/Ресурс не содержит валидный RSS/i);
+    })
+    .then((nodeWithInvalidXMLErrorMessage) => {
+      expect(nodeWithInvalidXMLErrorMessage).toBeInTheDocument();
+    }).then(() => {
+      userEvent.click(screen.getByRole('button', { name: /English/i }));
+      return screen.findByText(/No RSS channel found./i);
     })
     .then((nodeWithInvalidXMLErrorMessage) => {
       expect(nodeWithInvalidXMLErrorMessage).toBeInTheDocument();
@@ -175,8 +208,12 @@ describe('RSS Reader display posts:', () => {
         userEvent.click(screen.getByRole('button', { name: 'add' }));
 
         return waitFor(() => {
+          expect(screen.queryByText(/Фиды/i)).toBeInTheDocument();
+
           expect(screen.getByText(/Lorem ipsum feed for an interval of 1 years with 2 item\(s\)/)).toBeInTheDocument();
           expect(screen.getByText(/This is a nonupdating lorem ipsum feed/)).toBeInTheDocument();
+
+          expect(screen.queryByText(/Посты/i)).toBeInTheDocument();
 
           expect(screen.getByRole('link', { name: /Lorem ipsum 2021-01-01T00:00:00Z/i })).toBeInTheDocument();
           expect(screen.getByRole('link', { name: /Lorem ipsum 2020-01-01T00:00:00Z/i })).toBeInTheDocument();
@@ -226,12 +263,20 @@ describe('RSS Reader display posts:', () => {
 
         expect(screen.getByRole('link', { name: /Lorem ipsum 2021-03-23T13:29:00Z/i })).toHaveClass('font-weight-bold');
         userEvent.click(previewButtons[0]);
-        return screen.findByText('Aliquip proident non ut veniam.');
+        return waitFor(() => {
+          expect(screen.getByText('Aliquip proident non ut veniam.')).toBeVisible();
+          expect(screen.getByRole('button', { name: /Читать полностью/i, hidden: true })).toHaveAttribute('href', 'http://example.com/test/1616506140');
+          expect(screen.getByRole('link', { name: /Lorem ipsum 2021-03-23T13:29:00Z/i })).not.toHaveClass('font-weight-bold');
+        });
       })
-      .then((nodeWithDescriptionInsideModal) => {
-        expect(nodeWithDescriptionInsideModal).toBeVisible();
-        expect(screen.getByRole('button', { name: /Читать полностью/i, hidden: true })).toHaveAttribute('href', 'http://example.com/test/1616506140');
-        expect(screen.getByRole('link', { name: /Lorem ipsum 2021-03-23T13:29:00Z/i })).not.toHaveClass('font-weight-bold');
+      .then(() => {
+        userEvent.click(screen.getByRole('button', { name: /English/i }));
+        return waitFor(() => {
+          expect(screen.queryByText(/Feeds/i)).toBeInTheDocument();
+          expect(screen.queryByText(/Posts/i)).toBeInTheDocument();
+          expect(screen.getAllByRole('button', { name: /View/i })[0]).toBeInTheDocument();
+          expect(screen.getByRole('button', { name: /Read more/i, hidden: true }));
+        });
       });
   });
 });
