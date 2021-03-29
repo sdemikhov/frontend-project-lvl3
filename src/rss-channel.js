@@ -13,7 +13,7 @@ export default (stringWithXML) => {
 
   if (!channelEl) {
     const parserError = new Error();
-    parserError.message = { ...parserError.message, localization: { key: 'parseXML.error' } };
+    parserError.message = 'parseXML.error';
     throw parserError;
   }
 

@@ -4,8 +4,8 @@ import renders from './renders.js';
 
 export default (state, elements, i18nextInstance) => {
   const watchedState = onChange(state, (path, value) => {
-    if (path === 'requestForm.errors') {
-      renders.renderErrors(value, elements, i18nextInstance);
+    if (path === 'requestForm.error') {
+      renders.renderError(value, elements, i18nextInstance);
       return;
     }
 

@@ -41,28 +41,34 @@ describe('Parsing XML for RSS channel', () => {
 describe('Validate URL function', () => {
   describe.each([
     [
-      'unique URL and not empty already downloaded URLs array ',
+      'unique URL and not empty already added URLs array ',
       'http://unique.example.com',
       ['http://a.example.com', 'http://b.example.com'],
-      true,
+      null,
     ],
     [
-      'empty string as URL and empty already downloaded URLs array ',
+      'incorrect URL',
+      'incorrect.example.com',
+      ['http://a.example.com', 'http://b.example.com'],
+      'validation.url',
+    ],
+    [
+      'empty string as URL',
       '',
       [],
-      false,
+      'validation.required',
     ],
     [
-      'Not unique URL and not empty already downloaded urls array ',
+      'Not unique URL and not empty already added urls array ',
       'http://notunique.example.com',
       ['http://a.example.com', 'http://notunique.example.com'],
-      false,
+      'validation.notOneOf',
     ],
-  ])('Then called with %s', (description, url, downloadedURLS, result) => {
-    test(`should return errors array, check it for zero length is ${result}`, () => {
+  ])('Then called with %s', (description, url, addedURLS, result) => {
+    test(`should return ${result}`, () => {
       const { validateURL } = validators;
-      return validateURL(url, downloadedURLS)
-        .then((errors) => expect(errors.length === 0).toBe(result));
+      const error = validateURL(url, addedURLS);
+      expect(error).toBe(result);
     });
   });
 });

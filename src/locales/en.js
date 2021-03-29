@@ -34,5 +34,8 @@ export default {
       closeModal: ['Close'],
       readMore: ['Read more'],
     },
+    error: {
+      unknown: 'Unknown error occurs',
+    },
   },
 };

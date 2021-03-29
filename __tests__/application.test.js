@@ -22,6 +22,8 @@ const dirname = path.dirname(filename);
 const getFixturePath = (name) => path.join(dirname, '__fixtures__', name);
 const readFile = (name) => fs.promises.readFile(getFixturePath(name), 'utf-8');
 
+const updateTimeout = 20;
+
 beforeAll(() => {
   axios.defaults.adapter = adapter;
   nock.disableNetConnect();
@@ -35,13 +37,20 @@ beforeEach(() => (fs.promises
   .readFile(path.join(dirname, '..', 'index.html'), 'utf-8')
   .then((initHtml) => {
     document.body.innerHTML = initHtml.toString();
-    return init();
+    return init(updateTimeout);
   })
 ));
 
 afterEach(() => {
   nock.cleanAll();
   document.body.innerHTML = '';
+});
+
+describe('Immediately after loading:', () => {
+  test('Should not display feeds or posts', () => {
+    expect(screen.queryByText(/Фиды/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Посты/i)).not.toBeInTheDocument();
+  });
 });
 
 describe('RSS Reader displays messages:', () => {
@@ -209,7 +218,7 @@ describe('RSS Reader display posts:', () => {
         expect(screen.getByRole('link', { name: /Lorem ipsum 2020-01-01T00:00:00Z/i })).toBeInTheDocument();
         expect(screen.getByRole('link', { name: /Lorem ipsum 2020-01-01T00:00:00Z/i })).toHaveAttribute('href', 'http://example.com/test/1577836800');
         expect(screen.getAllByRole('link', { name: /Lorem ipsum \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z/i }).length).toBe(5);
-      }, { timeout: 8000 })
+      })
       ))
       .then(() => {
         const previewButtons = screen.getAllByRole('button', { name: /Просмотр/i });
@@ -224,5 +233,5 @@ describe('RSS Reader display posts:', () => {
         expect(screen.getByRole('button', { name: /Читать полностью/i, hidden: true })).toHaveAttribute('href', 'http://example.com/test/1616506140');
         expect(screen.getByRole('link', { name: /Lorem ipsum 2021-03-23T13:29:00Z/i })).not.toHaveClass('font-weight-bold');
       });
-  }, 10000);
+  });
 });

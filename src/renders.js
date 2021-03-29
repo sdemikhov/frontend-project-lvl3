@@ -1,19 +1,12 @@
 /* eslint-disable no-param-reassign, */
 import resources from './locales/locales.js';
 
-const renderErrors = (errors, elements, i18nextInstance) => {
-  if (errors.length > 0) {
-    const messages = errors.map(({ message }) => {
-      const { localization } = message;
-
-      if (localization) {
-        return i18nextInstance.t(localization.key);
-      }
-      return message;
-    });
+const renderError = (error, elements, i18nextInstance) => {
+  if (error) {
+    const message = i18nextInstance.t([error, 'error.unknown']);
 
     elements.feedback.classList.add('text-danger');
-    elements.feedback.textContent = messages.join(', ');
+    elements.feedback.textContent = message;
 
     elements.input.setAttribute('aria-describedby', elements.feedback.id);
     elements.input.classList.add('is-invalid');
@@ -51,12 +44,12 @@ const renderFormState = (value, elements, i18nextInstance) => {
 };
 
 const renderLanguageChange = (state, elements, i18nextInstance) => {
-  const { errors } = state.requestForm;
+  const { error } = state.requestForm;
   const { language: code } = state;
   const { state: formState } = state.requestForm;
 
   i18nextInstance.changeLanguage(code);
-  renderErrors(errors, elements, i18nextInstance);
+  renderError(error, elements, i18nextInstance);
   renderFormState(formState, elements, i18nextInstance);
 
   elements.changeLanguageButtons.forEach((button) => {
@@ -190,7 +183,7 @@ const renderViewedPosts = (selectedPostId, elements) => {
 };
 
 export default {
-  renderErrors,
+  renderError,
   renderFormState,
   renderLanguageChange,
   renderFeeds,

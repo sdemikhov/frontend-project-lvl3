@@ -34,5 +34,8 @@ export default {
       closeModal: ['Закрыть'],
       readMore: ['Читать полностью'],
     },
+    error: {
+      unknown: 'Произошла неизвестная ошибка',
+    },
   },
 };

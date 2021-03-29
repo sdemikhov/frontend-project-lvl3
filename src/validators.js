@@ -1,31 +1,26 @@
 import * as yup from 'yup';
 
-const validateURL = (url, downloadedURLS) => {
-  const schema = yup
-    .string()
-    .required()
-    .url()
-    .notOneOf(downloadedURLS);
-  return schema
-    .validate(url, { abortEarly: false })
-    .then(() => [])
-    .catch((e) => e.inner);
+const validateURL = (url, addedURLS) => {
+  const schema = yup.string().required().url().notOneOf(addedURLS);
+
+  try {
+    schema.validateSync(url, { abortEarly: false });
+    return null;
+  } catch (err) {
+    return err.message;
+  }
 };
 
 const buildValidators = () => {
   yup.setLocale({
     mixed: {
-      notOneOf: () => ({ localization: { key: 'validation.notOneOf' } }),
+      notOneOf: () => 'validation.notOneOf',
+      required: () => 'validation.required',
     },
-    string: {
-      required: () => ({ localization: { key: 'validation.required' } }),
-      url: () => ({ localization: { key: 'validation.url' } }),
-    },
+    string: { url: () => 'validation.url' },
   });
 
-  return {
-    validateURL,
-  };
+  return { validateURL };
 };
 
 export default buildValidators();

@@ -1,17 +1,109 @@
+/* eslint-disable no-param-reassign, */
 import i18n from 'i18next';
+import axios from 'axios';
+import _ from 'lodash';
 
 import getWatchedState from './watchers.js';
 import resources from './locales/locales.js';
-import handlers from './handlers.js';
+import parseRSS from './rss-channel.js';
+import validators from './validators.js';
 
 const DEFAULT_LANGUAGE = 'ru';
 
-export default () => {
+const getProxyUrl = (feedURL) => {
+  const result = new URL('get', 'https://hexlet-allorigins.herokuapp.com');
+  result.searchParams.append('disableCache', true);
+  result.searchParams.append('url', feedURL);
+  return result.toString();
+};
+
+const updatePosts = (state, updateTimeout) => {
+  const getPosts = () => {
+    if (state.feeds.length === 0) {
+      return Promise.resolve();
+    }
+
+    const addedURLS = state.feeds.map((feed) => feed.url);
+    const requests = addedURLS.map((feedURL) => axios.get(getProxyUrl(feedURL))
+      .then((resp) => {
+        const [, posts] = parseRSS(resp.data.contents);
+        return posts;
+      })
+      .catch(() => []));
+
+    return Promise.all(requests).then((allPosts) => {
+      const newPostsWithoutId = _.differenceBy(_.flatten(allPosts), state.posts, 'url');
+      const newPosts = newPostsWithoutId.map((post) => ({ ...post, id: _.uniqueId() }));
+      state.posts = [...state.posts, ...newPosts];
+    });
+  };
+
+  getPosts().then(() => setTimeout(updatePosts, updateTimeout, state, updateTimeout));
+};
+
+const addFeedWithPosts = (state, url) => axios.get(getProxyUrl(url))
+  .then((response) => {
+    const [feed, posts] = parseRSS(response.data.contents);
+
+    state.feeds.push({ ...feed, url });
+
+    const newPosts = posts.map((post) => ({ ...post, id: _.uniqueId() }));
+
+    state.posts = [...state.posts, ...newPosts];
+    state.requestForm.state = 'finished';
+  })
+  .catch((err) => {
+    state.requestForm.state = 'failed';
+    if (axios.isAxiosError(err)) {
+      state.requestForm.error = 'downloadFeed.failed';
+    } else {
+      state.requestForm.error = err.message;
+    }
+  });
+
+const handleFormSubmit = (state) => (e) => {
+  e.preventDefault();
+
+  const formData = new FormData(e.target);
+  const url = formData.get('url');
+
+  const addedURLS = state.feeds.map((feed) => feed.url);
+
+  const { validateURL } = validators;
+  const error = validateURL(url, addedURLS);
+  state.requestForm.error = error;
+
+  if (error) {
+    return;
+  }
+
+  state.requestForm.state = 'sending';
+
+  addFeedWithPosts(state, url);
+};
+
+const handleChangeLanguageClick = (state) => (e) => {
+  const { language } = e.target.dataset;
+  state.language = language;
+};
+
+const handlePostPreviewClick = (state) => (e) => {
+  const button = e.target.closest('button');
+  if (!button) {
+    return;
+  }
+
+  const selectedPostId = button.dataset.id;
+  state.postIdForModal = selectedPostId;
+  state.visitedPostsIds.add(selectedPostId);
+};
+
+export default (updateTimeout = 5000) => {
   const state = {
     language: DEFAULT_LANGUAGE,
     requestForm: {
       state: 'filling',
-      errors: [],
+      error: null,
     },
     feeds: [],
     posts: [],
@@ -45,10 +137,12 @@ export default () => {
       const watchedState = getWatchedState(state, elements, i18nextInstance);
 
       changeLanguageButtons.forEach((button) => {
-        button.addEventListener('click', handlers.handleChangeLanguageClick(watchedState));
+        button.addEventListener('click', handleChangeLanguageClick(watchedState));
       });
 
-      form.addEventListener('submit', handlers.handleFormSubmit(watchedState));
-      postsContainer.addEventListener('click', handlers.handlePostPreviewClick(watchedState));
+      form.addEventListener('submit', handleFormSubmit(watchedState));
+      postsContainer.addEventListener('click', handlePostPreviewClick(watchedState));
+
+      updatePosts(watchedState, updateTimeout);
     });
 };
