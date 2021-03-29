@@ -275,7 +275,7 @@ describe('RSS Reader display posts:', () => {
           expect(screen.queryByText(/Feeds/i)).toBeInTheDocument();
           expect(screen.queryByText(/Posts/i)).toBeInTheDocument();
           expect(screen.getAllByRole('button', { name: /View/i })[0]).toBeInTheDocument();
-          expect(screen.getByRole('button', { name: /Read more/i, hidden: true }));
+          expect(screen.getByRole('button', { name: /Read more/i, hidden: true })).toBeInTheDocument();
         });
       });
   });
